@@ -1,0 +1,78 @@
+<div class="form-container">
+    {form name='legacy_product_attributes_form_legacy_product_attributes_values'}
+        <form method="post" action="{url path='/admin/module/LegacyProductAttributes/attributes_values'}" {form_enctype form=$form}>
+            {form_field form=$form field='product_id'}
+                <input name="{$name}" value="{product attr='id'}" type="hidden">
+            {/form_field}
+
+            {loop type='currency' name='product-currency' id=$edit_currency_id}
+            {$currency_symbol = $SYMBOL}
+
+            {form_field form=$form field='currency_id'}
+                <input name="{$name}" value="{$ID}" type="hidden">
+            {/form_field}
+            {/loop}
+
+            {form_field form=$form field='success_url'}
+                <input name="{$name}" value="{navigate to='current'}" type="hidden">
+            {/form_field}
+
+            {form_hidden_fields form=$form}
+
+            {include
+            file = 'includes/inner-form-toolbar.html'
+            hide_flags = true
+            show_currencies = true
+            page_url = {url path='/admin/products/update' product_id={product attr='id'}}
+            close_url = {url path='/admin/categories' category_id={category attr='id'}}
+            }
+
+            <div class="row">
+                {loop
+                name='legacy_product_attributes.attributes'
+                type='attribute'
+                product={product attr='id'}
+                }
+                    <div class="col-md-3">
+                        <div class="well well-sm">
+                            <div class="title title-without-tabs">
+                                {$TITLE}
+                            </div>
+
+                            <table class="table table-striped table-condensed">
+                                <tbody>
+                                {loop
+                                name='legacy_product_attributes.attributes.availability'
+                                type='attribute_availability'
+                                attribute=$ID
+                                }
+                                    <tr>
+                                        <td>
+                                            <div class="title">
+                                                {$TITLE}
+                                            </div>
+                                            <div class="form-group">
+                                                {form_field
+                                                form=$form
+                                                field='legacy_product_attribute_value_price_delta'
+                                                value_key=$ID
+                                                }
+                                                <label>Price supplement excluding taxes:</label>
+                                                <div class="input-group">
+                                                <input name="{$name}" value="{$value}" type="number" class="form-control">
+                                                <span class="input-group-addon">{$currency_symbol}</span>
+                                                </div>
+                                                {/form_field}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {/loop}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {/loop}
+            </div>
+        </form>
+    {/form}
+</div>

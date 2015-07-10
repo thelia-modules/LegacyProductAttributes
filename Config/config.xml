@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<config xmlns="http://thelia.net/schema/dic/config"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://thelia.net/schema/dic/config http://thelia.net/schema/dic/config/thelia-1.0.xsd">
+
+    <loops>
+        <loop name="legacy_cart_item_attribute_combination"
+              class="LegacyProductAttributes\Loop\LegacyCartItemAttributeCombinationLoop"/>
+    </loops>
+
+    <forms>
+        <form name="legacy_product_attributes_form_legacy_product_attributes_values"
+              class="LegacyProductAttributes\Form\LegacyProductAttributesValuesForm"/>
+    </forms>
+
+    <hooks>
+        <hook id="legacy_product_attributes.hook.back" class="LegacyProductAttributes\Hook\BackHook" scope="request">
+            <tag name="hook.event_listener" type="backoffice" event="product.tab"/>
+        </hook>
+        <hook id="legacy_product_attributes.hook.front" class="LegacyProductAttributes\Hook\FrontHook" scope="request">
+            <tag name="hook.event_listener" type="frontoffice" event="product.javascript-initialization"/>
+            <tag name="hook.event_listener" type="frontoffice" event="cart.javascript-initialization"/>
+        </hook>
+    </hooks>
+
+    <services>
+        <service id="legacy_product_attributes.form_extension.cart_add"
+                 class="LegacyProductAttributes\Form\CartAddFormExtension"
+                 scope="request">
+            <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="request"/>
+        </service>
+
+        <service id="legacy_product_attributes.action.cart"
+                 parent="thelia.action.cart"
+                 class="LegacyProductAttributes\EventListeners\CartAction"
+                 scope="request">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+        <service id="legacy_product_attributes.action.order"
+                 class="LegacyProductAttributes\EventListeners\OrderAction">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+    </services>
+
+</config>
