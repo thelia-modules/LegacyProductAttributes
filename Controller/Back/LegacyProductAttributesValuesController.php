@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyProductAttributes\Controller;
+namespace LegacyProductAttributes\Back\Controller;
 
 use LegacyProductAttributes\Model\LegacyProductAttributeValue;
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePrice;

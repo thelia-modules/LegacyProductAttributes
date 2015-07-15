@@ -13,7 +13,9 @@ class FrontHook extends BaseHook
         $event->add($this->render('product-form-product-details.html'));
         $event->add('</script>');
 
-        $event->add($this->addJS('assets/js/product.js'));
+        $event->add('<script type="text/javascript">');
+        $event->add($this->render('assets/js/product.js'));
+        $event->add('</script>');
     }
 
     public function onCartJavascriptInitialization(HookRenderEvent $event)

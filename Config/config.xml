@@ -25,6 +25,11 @@
     </hooks>
 
     <services>
+        <service id="legacy_product_attributes.action.product"
+                 class="LegacyProductAttributes\Action\ProductAction">
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="legacy_product_attributes.form_extension.cart_add"
                  class="LegacyProductAttributes\Form\CartAddFormExtension"
                  scope="request">
@@ -32,14 +37,14 @@
             <argument type="service" id="request"/>
         </service>
 
-        <service id="legacy_product_attributes.action.cart"
+        <service id="legacy_product_attributes.listener.cart"
                  parent="thelia.action.cart"
                  class="LegacyProductAttributes\EventListeners\CartAction"
                  scope="request">
             <tag name="kernel.event_subscriber"/>
         </service>
 
-        <service id="legacy_product_attributes.action.order"
+        <service id="legacy_product_attributes.listener.order"
                  class="LegacyProductAttributes\EventListeners\OrderAction">
             <tag name="kernel.event_subscriber"/>
         </service>

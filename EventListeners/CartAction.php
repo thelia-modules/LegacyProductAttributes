@@ -2,12 +2,11 @@
 
 namespace LegacyProductAttributes\EventListeners;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\ProductGetPricesEvent;
 use LegacyProductAttributes\Form\CartAddFormExtension;
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombination;
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombinationQuery;
-use LegacyProductAttributes\Model\LegacyProductAttributeValue;
-use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
-use Propel\Runtime\ActiveQuery\Criteria;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Action\Cart;
 use Thelia\Core\Event\Cart\CartEvent;
@@ -27,7 +26,7 @@ class CartAction extends Cart
     public static function getSubscribedEvents()
     {
         return [
-            TheliaEvents::CART_ADDITEM => ['addItem', 192]
+            TheliaEvents::CART_ADDITEM => ['addItem', 192],
         ];
     }
 
@@ -100,29 +99,16 @@ class CartAction extends Cart
         $quantity,
         ProductPriceTools $productPrices
     ) {
-        $legacyProductAttributeValues = LegacyProductAttributeValueQuery::create()
-            ->filterByProductId($productId)
-            ->filterByAttributeAvId(array_values($this->legacyProductAttributes), Criteria::IN)
-            ->find();
+        // get the adjusted price
+        $productGetPricesEvent = (new ProductGetPricesEvent($productId))
+            ->setCurrencyId($cart->getCurrencyId())
+            ->setBasePrices($productPrices)
+            ->setLegacyProductAttributes($this->legacyProductAttributes);
 
-        $price = $productPrices->getPrice();
-        $promoPrice = $productPrices->getPromoPrice();
-
-        // adjust prices
-        /** @var LegacyProductAttributeValue $legacyProductAttributeValue */
-        foreach ($legacyProductAttributeValues as $legacyProductAttributeValue) {
-            $legacyProductAttributeValuePrice = $legacyProductAttributeValue->getPriceForCurrency(
-                $cart->getCurrencyId()
-            );
-            if ($legacyProductAttributeValuePrice === null) {
-                continue;
-            }
-
-            $price += $legacyProductAttributeValuePrice->getDelta();
-            $promoPrice += $legacyProductAttributeValuePrice->getDelta();
+        $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
+        if (null !== $productGetPricesEvent->getPrices()) {
+            $productPrices = $productGetPricesEvent->getPrices();
         }
-
-        $productPrices = new ProductPriceTools($price, $promoPrice);
 
         $cartItem = parent::doAddItem($dispatcher, $cart, $productId, $productSaleElements, $quantity, $productPrices);
 
@@ -134,5 +120,7 @@ class CartAction extends Cart
                 ->setAttributeAvId($attributeAvId)
                 ->save();
         }
+
+        return $cartItem;
     }
 }
