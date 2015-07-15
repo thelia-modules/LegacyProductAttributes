@@ -68,18 +68,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     protected $attribute_av_id;
 
     /**
-     * The value for the quantity field.
-     * @var        int
-     */
-    protected $quantity;
-
-    /**
-     * The value for the active field.
-     * @var        boolean
-     */
-    protected $active;
-
-    /**
      * @var        Product
      */
     protected $aProduct;
@@ -378,28 +366,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     }
 
     /**
-     * Get the [quantity] column value.
-     *
-     * @return   int
-     */
-    public function getQuantity()
-    {
-
-        return $this->quantity;
-    }
-
-    /**
-     * Get the [active] column value.
-     *
-     * @return   boolean
-     */
-    public function getActive()
-    {
-
-        return $this->active;
-    }
-
-    /**
      * Set the value of [product_id] column.
      *
      * @param      int $v new value
@@ -450,56 +416,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     } // setAttributeAvId()
 
     /**
-     * Set the value of [quantity] column.
-     *
-     * @param      int $v new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValue The current object (for fluent API support)
-     */
-    public function setQuantity($v)
-    {
-        if ($v !== null) {
-            $v = (int) $v;
-        }
-
-        if ($this->quantity !== $v) {
-            $this->quantity = $v;
-            $this->modifiedColumns[LegacyProductAttributeValueTableMap::QUANTITY] = true;
-        }
-
-
-        return $this;
-    } // setQuantity()
-
-    /**
-     * Sets the value of the [active] column.
-     * Non-boolean arguments are converted using the following rules:
-     *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
-     *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
-     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
-     *
-     * @param      boolean|integer|string $v The new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValue The current object (for fluent API support)
-     */
-    public function setActive($v)
-    {
-        if ($v !== null) {
-            if (is_string($v)) {
-                $v = in_array(strtolower($v), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
-            } else {
-                $v = (boolean) $v;
-            }
-        }
-
-        if ($this->active !== $v) {
-            $this->active = $v;
-            $this->modifiedColumns[LegacyProductAttributeValueTableMap::ACTIVE] = true;
-        }
-
-
-        return $this;
-    } // setActive()
-
-    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -541,12 +457,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->attribute_av_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('Quantity', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->quantity = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('Active', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->active = (null !== $col) ? (boolean) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -555,7 +465,7 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = LegacyProductAttributeValueTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 2; // 2 = LegacyProductAttributeValueTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating \LegacyProductAttributes\Model\LegacyProductAttributeValue object", 0, $e);
@@ -793,12 +703,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID)) {
             $modifiedColumns[':p' . $index++]  = 'ATTRIBUTE_AV_ID';
         }
-        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::QUANTITY)) {
-            $modifiedColumns[':p' . $index++]  = 'QUANTITY';
-        }
-        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ACTIVE)) {
-            $modifiedColumns[':p' . $index++]  = 'ACTIVE';
-        }
 
         $sql = sprintf(
             'INSERT INTO legacy_product_attribute_value (%s) VALUES (%s)',
@@ -815,12 +719,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
                         break;
                     case 'ATTRIBUTE_AV_ID':
                         $stmt->bindValue($identifier, $this->attribute_av_id, PDO::PARAM_INT);
-                        break;
-                    case 'QUANTITY':
-                        $stmt->bindValue($identifier, $this->quantity, PDO::PARAM_INT);
-                        break;
-                    case 'ACTIVE':
-                        $stmt->bindValue($identifier, (int) $this->active, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -883,12 +781,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
             case 1:
                 return $this->getAttributeAvId();
                 break;
-            case 2:
-                return $this->getQuantity();
-                break;
-            case 3:
-                return $this->getActive();
-                break;
             default:
                 return null;
                 break;
@@ -920,8 +812,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
         $result = array(
             $keys[0] => $this->getProductId(),
             $keys[1] => $this->getAttributeAvId(),
-            $keys[2] => $this->getQuantity(),
-            $keys[3] => $this->getActive(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -975,12 +865,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
             case 1:
                 $this->setAttributeAvId($value);
                 break;
-            case 2:
-                $this->setQuantity($value);
-                break;
-            case 3:
-                $this->setActive($value);
-                break;
         } // switch()
     }
 
@@ -1007,8 +891,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
         if (array_key_exists($keys[0], $arr)) $this->setProductId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setAttributeAvId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setQuantity($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setActive($arr[$keys[3]]);
     }
 
     /**
@@ -1022,8 +904,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::PRODUCT_ID)) $criteria->add(LegacyProductAttributeValueTableMap::PRODUCT_ID, $this->product_id);
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID)) $criteria->add(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
-        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::QUANTITY)) $criteria->add(LegacyProductAttributeValueTableMap::QUANTITY, $this->quantity);
-        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ACTIVE)) $criteria->add(LegacyProductAttributeValueTableMap::ACTIVE, $this->active);
 
         return $criteria;
     }
@@ -1096,8 +976,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     {
         $copyObj->setProductId($this->getProductId());
         $copyObj->setAttributeAvId($this->getAttributeAvId());
-        $copyObj->setQuantity($this->getQuantity());
-        $copyObj->setActive($this->getActive());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1234,8 +1112,6 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     {
         $this->product_id = null;
         $this->attribute_av_id = null;
-        $this->quantity = null;
-        $this->active = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
         $this->resetModified();

@@ -13,8 +13,6 @@ CREATE TABLE `legacy_product_attribute_value`
 (
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
-    `quantity` INTEGER,
-    `active` TINYINT(1),
     PRIMARY KEY (`product_id`,`attribute_av_id`),
     INDEX `legacy_product_attribute_value_FI_2` (`attribute_av_id`),
     CONSTRAINT `legacy_product_attribute_value_FK_1`

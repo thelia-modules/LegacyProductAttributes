@@ -6,8 +6,6 @@
     <table name="legacy_product_attribute_value" namespace="LegacyProductAttributes\Model">
         <column name="product_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="attribute_av_id" type="INTEGER" required="true" primaryKey="true"/>
-        <column name="quantity" type="INTEGER"/>
-        <column name="active" type="BOOLEAN"/>
 
         <foreign-key foreignTable="product" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference local="product_id" foreign="id"/>

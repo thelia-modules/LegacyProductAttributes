@@ -70,15 +70,6 @@ class LegacyProductAttributesValuesForm extends BaseForm
 
         /** @var AttributeAv $productAttributeAv */
         foreach ($productAttributeAvs as $productAttributeAv) {
-            $legacyProductAttributeValue = LegacyProductAttributeValueQuery::create()
-                ->findPk([
-                    $product->getId(),
-                    $productAttributeAv->getId(),
-                ]);
-
-            $formData['active'][$productAttributeAv->getId()] =
-                ($legacyProductAttributeValue !== null) ? $legacyProductAttributeValue->getActive() : false;
-
             $legacyProductAttributeValuePrice = LegacyProductAttributeValuePriceQuery::create()
                 ->findPk([
                     $product->getId(),

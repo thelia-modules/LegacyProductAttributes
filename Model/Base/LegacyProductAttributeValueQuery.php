@@ -25,13 +25,9 @@ use Thelia\Model\Product;
  *
  * @method     ChildLegacyProductAttributeValueQuery orderByProductId($order = Criteria::ASC) Order by the product_id column
  * @method     ChildLegacyProductAttributeValueQuery orderByAttributeAvId($order = Criteria::ASC) Order by the attribute_av_id column
- * @method     ChildLegacyProductAttributeValueQuery orderByQuantity($order = Criteria::ASC) Order by the quantity column
- * @method     ChildLegacyProductAttributeValueQuery orderByActive($order = Criteria::ASC) Order by the active column
  *
  * @method     ChildLegacyProductAttributeValueQuery groupByProductId() Group by the product_id column
  * @method     ChildLegacyProductAttributeValueQuery groupByAttributeAvId() Group by the attribute_av_id column
- * @method     ChildLegacyProductAttributeValueQuery groupByQuantity() Group by the quantity column
- * @method     ChildLegacyProductAttributeValueQuery groupByActive() Group by the active column
  *
  * @method     ChildLegacyProductAttributeValueQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildLegacyProductAttributeValueQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -50,13 +46,9 @@ use Thelia\Model\Product;
  *
  * @method     ChildLegacyProductAttributeValue findOneByProductId(int $product_id) Return the first ChildLegacyProductAttributeValue filtered by the product_id column
  * @method     ChildLegacyProductAttributeValue findOneByAttributeAvId(int $attribute_av_id) Return the first ChildLegacyProductAttributeValue filtered by the attribute_av_id column
- * @method     ChildLegacyProductAttributeValue findOneByQuantity(int $quantity) Return the first ChildLegacyProductAttributeValue filtered by the quantity column
- * @method     ChildLegacyProductAttributeValue findOneByActive(boolean $active) Return the first ChildLegacyProductAttributeValue filtered by the active column
  *
  * @method     array findByProductId(int $product_id) Return ChildLegacyProductAttributeValue objects filtered by the product_id column
  * @method     array findByAttributeAvId(int $attribute_av_id) Return ChildLegacyProductAttributeValue objects filtered by the attribute_av_id column
- * @method     array findByQuantity(int $quantity) Return ChildLegacyProductAttributeValue objects filtered by the quantity column
- * @method     array findByActive(boolean $active) Return ChildLegacyProductAttributeValue objects filtered by the active column
  *
  */
 abstract class LegacyProductAttributeValueQuery extends ModelCriteria
@@ -145,7 +137,7 @@ abstract class LegacyProductAttributeValueQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT PRODUCT_ID, ATTRIBUTE_AV_ID, QUANTITY, ACTIVE FROM legacy_product_attribute_value WHERE PRODUCT_ID = :p0 AND ATTRIBUTE_AV_ID = :p1';
+        $sql = 'SELECT PRODUCT_ID, ATTRIBUTE_AV_ID FROM legacy_product_attribute_value WHERE PRODUCT_ID = :p0 AND ATTRIBUTE_AV_ID = :p1';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
@@ -330,74 +322,6 @@ abstract class LegacyProductAttributeValueQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, $attributeAvId, $comparison);
-    }
-
-    /**
-     * Filter the query on the quantity column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByQuantity(1234); // WHERE quantity = 1234
-     * $query->filterByQuantity(array(12, 34)); // WHERE quantity IN (12, 34)
-     * $query->filterByQuantity(array('min' => 12)); // WHERE quantity > 12
-     * </code>
-     *
-     * @param     mixed $quantity The value to use as filter.
-     *              Use scalar values for equality.
-     *              Use array values for in_array() equivalent.
-     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildLegacyProductAttributeValueQuery The current query, for fluid interface
-     */
-    public function filterByQuantity($quantity = null, $comparison = null)
-    {
-        if (is_array($quantity)) {
-            $useMinMax = false;
-            if (isset($quantity['min'])) {
-                $this->addUsingAlias(LegacyProductAttributeValueTableMap::QUANTITY, $quantity['min'], Criteria::GREATER_EQUAL);
-                $useMinMax = true;
-            }
-            if (isset($quantity['max'])) {
-                $this->addUsingAlias(LegacyProductAttributeValueTableMap::QUANTITY, $quantity['max'], Criteria::LESS_EQUAL);
-                $useMinMax = true;
-            }
-            if ($useMinMax) {
-                return $this;
-            }
-            if (null === $comparison) {
-                $comparison = Criteria::IN;
-            }
-        }
-
-        return $this->addUsingAlias(LegacyProductAttributeValueTableMap::QUANTITY, $quantity, $comparison);
-    }
-
-    /**
-     * Filter the query on the active column
-     *
-     * Example usage:
-     * <code>
-     * $query->filterByActive(true); // WHERE active = true
-     * $query->filterByActive('yes'); // WHERE active = true
-     * </code>
-     *
-     * @param     boolean|string $active The value to use as filter.
-     *              Non-boolean arguments are converted using the following rules:
-     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
-     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
-     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
-     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
-     *
-     * @return ChildLegacyProductAttributeValueQuery The current query, for fluid interface
-     */
-    public function filterByActive($active = null, $comparison = null)
-    {
-        if (is_string($active)) {
-            $active = in_array(strtolower($active), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
-        }
-
-        return $this->addUsingAlias(LegacyProductAttributeValueTableMap::ACTIVE, $active, $comparison);
     }
 
     /**
