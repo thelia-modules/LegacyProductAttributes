@@ -11,6 +11,7 @@ use Thelia\Model\CurrencyQuery;
 use Thelia\Model\ProductQuery;
 use Thelia\TaxEngine\Calculator;
 use Thelia\TaxEngine\TaxEngine;
+use Thelia\Tools\NumberFormat;
 
 class LegacyProductAttributesValuesForm extends BaseForm
 {
@@ -83,13 +84,19 @@ class LegacyProductAttributesValuesForm extends BaseForm
                     $currencyId
                 ]);
 
-            $formData['price_delta'][$productAttributeAv->getId()] =
-                ($legacyProductAttributeValuePrice !== null) ?
-                    $legacyProductAttributeValuePrice->getDelta() : 0;
+            $priceDelta = 0;
+            $priceDeltaWithTax = 0;
+            if (null !== $legacyProductAttributeValuePrice) {
+                $priceDelta = $legacyProductAttributeValuePrice->getDelta();
+                $priceDeltaWithTax = $taxCalculator->getTaxedPrice($legacyProductAttributeValuePrice->getDelta());
+            }
 
-            $formData['price_delta_with_tax'][$productAttributeAv->getId()] =
-                ($legacyProductAttributeValuePrice !== null) ?
-                    $taxCalculator->getTaxedPrice($legacyProductAttributeValuePrice->getDelta()) : 0;
+            $numberFormatter = NumberFormat::getInstance($this->getRequest());
+
+            $formData['price_delta'][$productAttributeAv->getId()]
+                = $numberFormatter->formatStandardNumber($priceDelta);
+            $formData['price_delta_with_tax'][$productAttributeAv->getId()]
+                = $numberFormatter->formatStandardNumber($priceDeltaWithTax);
         }
 
         $this->formBuilder
