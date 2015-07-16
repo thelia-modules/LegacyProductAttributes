@@ -15,8 +15,17 @@ use Thelia\TaxEngine\Calculator;
 use Thelia\TaxEngine\TaxEngine;
 use Thelia\Tools\MoneyFormat;
 
+/**
+ * Front-office actions related to products.
+ */
 class ProductController extends BaseFrontController
 {
+    /**
+     * Get the price and, if in sale, promo price for a product, adjusted with the selected attribute values.
+     * Prices are with taxes and formatted for display.
+     *
+     * @return JsonResponse
+     */
     public function getPricesAction()
     {
         $baseForm = $this->createForm('thelia.cart.add');
@@ -69,10 +78,17 @@ class ProductController extends BaseFrontController
 
             return new JsonResponse($response);
         } catch (FormValidationException $e) {
-            throw $e;
+            return JsonResponse::createError('Invalid form', 400);
         }
     }
 
+    /**
+     * Get the selected product attribute values from the card add form.
+     *
+     * @param Form $form Cart add form.
+     *
+     * @return array A map of attribute ids => selected attribute value id.
+     */
     protected function getLegacyProductAttributesInForm(Form $form)
     {
         $product = ProductQuery::create()->findPk($form->get('product')->getData());

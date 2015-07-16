@@ -19,27 +19,47 @@ use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElements;
 use Thelia\Model\Tools\ProductPriceTools;
 
+/**
+ * Listener for cart related events.
+ */
 class CartAction extends Cart
 {
+    /**
+     * Selected attributes values for this request.
+     * @var array A map of attribute ids => selected attribute value id.
+     */
     protected $legacyProductAttributes = [];
 
     public static function getSubscribedEvents()
     {
         return [
+            // must run before the Thelia cart action
             TheliaEvents::CART_ADDITEM => ['addItem', 192],
         ];
     }
 
+    /**
+     * Manage adding an item to the cart when our legacy product attributes are used.
+     *
+     * @param CartEvent $event
+     */
     public function addItem(CartEvent $event)
     {
         $this->getLegacyProductAttributes($event);
 
+        // call the parent method, but using our redefined sub-methods
         parent::addItem($event);
 
+        // prevent the parent event from adding the item
         $event->setNewness(false);
         $event->setAppend(false);
     }
 
+    /**
+     * Get the selected legacy product attributes.
+     *
+     * @param CartEvent $event
+     */
     protected function getLegacyProductAttributes(CartEvent $event)
     {
         $product = ProductQuery::create()->findPk($event->getProduct());
@@ -58,8 +78,14 @@ class CartAction extends Cart
         }
     }
 
+    /**
+     * @inheritdoc
+     *
+     * Find a possible existing cart item by also filtering on our cart item attribute combinations.
+     */
     protected function findItem($cartId, $productId, $productSaleElementsId)
     {
+        // no legacy attributes, let the parent handle it
         if (empty($this->legacyProductAttributes)) {
             return parent::findItem($cartId, $productId, $productSaleElementsId);
         }
@@ -91,6 +117,12 @@ class CartAction extends Cart
         return null;
     }
 
+    /**
+     * @inheritdoc
+     *
+     * Adjust the item price depending on the selected attributes.
+     * Save the attribute combinations for the item.
+     */
     protected function doAddItem(
         EventDispatcherInterface $dispatcher,
         CartModel $cart,

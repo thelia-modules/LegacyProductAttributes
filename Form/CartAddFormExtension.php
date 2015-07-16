@@ -12,8 +12,14 @@ use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\AttributeQuery;
 use Thelia\Model\ProductQuery;
 
+/**
+ * Extension to the cart item add form.
+ */
 class CartAddFormExtension implements EventSubscriberInterface
 {
+    /**
+     * Prefix for the legacy product attribute fields.
+     */
     const LEGACY_PRODUCT_ATTRIBUTE_FIELD_PREFIX = 'legacy_product_attribute_';
 
     /**
@@ -33,6 +39,12 @@ class CartAddFormExtension implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Add fields for attribute values selection in our own way (since the product on has its default PSE, it has
+     * no attributes as far as Thelia is concerned, but we want it to have all of its template's attributes).
+     *
+     * @param TheliaFormEvent $event
+     */
     public function cartFormAfterBuild(TheliaFormEvent $event)
     {
         $sessionLocale = null;

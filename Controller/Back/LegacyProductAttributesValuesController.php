@@ -9,10 +9,17 @@ use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\HttpFoundation\Response;
 use Thelia\Form\Exception\FormValidationException;
 
+/**
+ * Controller for legacy product attribute values administration.
+ */
 class LegacyProductAttributesValuesController extends BaseAdminController
 {
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
     public function updateAction()
     {
         $baseForm = $this->createForm('legacy_product_attributes_form_legacy_product_attributes_values');
@@ -24,10 +31,17 @@ class LegacyProductAttributesValuesController extends BaseAdminController
 
             return $this->generateSuccessRedirect($baseForm);
         } catch (FormValidationException $e) {
-            throw $e;
+            return new Response('', 400);
         }
     }
 
+    /**
+     * Create or update the configuration for non-default legacy attribute values.
+     *
+     * @param array $formData Data from the edition form.
+     *
+     * @throws PropelException
+     */
     protected function doUpdate(array $formData)
     {
         foreach ($formData['legacy_product_attribute_value_price_delta'] as $attributeAvId => $priceDelta) {
@@ -44,15 +58,23 @@ class LegacyProductAttributesValuesController extends BaseAdminController
         }
     }
 
+    /**
+     * Create or update the configuration for a legacy product attribute value.
+     *
+     * @param int $productId Product id.
+     * @param int $attributeAvId Attribute value id.
+     * @param int $currencyId Currency id.
+     * @param float|null $priceDelta Price difference added (or removed) by the attribute value.
+     *
+     * @throws PropelException
+     */
     protected function createOrUpdateLegacyProductAttributeValue(
         $productId,
         $attributeAvId,
         $currencyId,
-        $priceDelta = null,
-        $quantity = null,
-        $active = null
+        $priceDelta = null
     ) {
-        if ($priceDelta === null && $quantity === null && $priceDelta === null) {
+        if ($priceDelta === null) {
             return;
         }
 
@@ -65,14 +87,6 @@ class LegacyProductAttributesValuesController extends BaseAdminController
             $legacyProductAttributeValue = (new LegacyProductAttributeValue())
                 ->setProductId($productId)
                 ->setAttributeAvId($attributeAvId);
-        }
-
-        if ($quantity !== null) {
-            $legacyProductAttributeValue->setQuantity($quantity);
-        }
-
-        if ($active !== null) {
-            $legacyProductAttributeValue->setActive($active);
         }
 
         $legacyProductAttributeValuePriceDelta = LegacyProductAttributeValuePriceQuery::create()

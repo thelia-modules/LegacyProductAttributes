@@ -4,11 +4,15 @@ namespace LegacyProductAttributes\EventListeners;
 
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombination;
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombinationQuery;
+use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Order\OrderProductEvent;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Model\OrderProductAttributeCombination;
 
+/**
+ * Listener for order related events.
+ */
 class OrderAction implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
@@ -18,6 +22,13 @@ class OrderAction implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Save the attribute combinations for the order from our cart item attribute combinations.
+     *
+     * @param OrderProductEvent $event
+     *
+     * @throws PropelException
+     */
     public function createOrderProductAttributeCombinations(OrderProductEvent $event)
     {
         $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()

@@ -10,6 +10,10 @@ use Thelia\Core\Template\Loop\AttributeCombination;
 use Thelia\Model\Map\AttributeAvTableMap;
 use Thelia\Model\Map\AttributeTableMap;
 
+/**
+ * Loop on legacy cart item attribute combinations.
+ * Uses the same output parsing as the attribute combination Thelia loop.
+ */
 class LegacyCartItemAttributeCombinationLoop extends AttributeCombination implements PropelSearchLoopInterface
 {
     protected $timestampable = false;

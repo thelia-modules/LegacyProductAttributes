@@ -13,6 +13,9 @@ use Thelia\TaxEngine\Calculator;
 use Thelia\TaxEngine\TaxEngine;
 use Thelia\Tools\NumberFormat;
 
+/**
+ * Form for legacy product attribute values configuration update.
+ */
 class LegacyProductAttributesValuesForm extends BaseForm
 {
     public function getName()

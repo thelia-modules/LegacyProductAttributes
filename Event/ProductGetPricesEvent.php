@@ -5,6 +5,9 @@ namespace LegacyProductAttributes\Event;
 use Thelia\Core\Event\ActionEvent;
 use Thelia\Model\Tools\ProductPriceTools;
 
+/**
+ * Event object to be dispatched for a LegacyProductAttributesEvents::PRODUCT_GET_PRICES event.
+ */
 class ProductGetPricesEvent extends ActionEvent
 {
     /** @var int */

@@ -7,10 +7,11 @@ use LegacyProductAttributes\Model\Base\LegacyProductAttributeValue as BaseLegacy
 class LegacyProductAttributeValue extends BaseLegacyProductAttributeValue
 {
     /**
-     * @param $currencyId
-     * @return array|LegacyProductAttributeValuePrice|mixed
+     * Get the currency-dependant configuration for this legacy product attribute value.
      *
-     * @todo bake this into the LegacyProductAttributeValueQuery to avoid multiple queries
+     * @param int $currencyId Currency id.
+     *
+     * @return null|LegacyProductAttributeValuePrice
      */
     public function getPriceForCurrency($currencyId)
     {
