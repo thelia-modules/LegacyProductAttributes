@@ -1,0 +1,12 @@
+{
+  "name": "thelia/legacy-product-attributes-module",
+  "license": "LGPL-3.0+",
+  "type": "thelia-module",
+  "extra": {
+    "installer-name": "LegacyProductAttributes"
+  },
+  "minimum-stability": "dev",
+  "require": {
+    "thelia/installer": "~1.0"
+  }
+}
