@@ -7,6 +7,7 @@ use Thelia\Core\Event\Hook\HookRenderBlockEvent;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 use Thelia\Core\Translation\Translator;
+use Thelia\Model\ProductQuery;
 
 /**
  * Back-office hooks.
@@ -20,6 +21,13 @@ class BackHook extends BaseHook
      */
     public function onProductTab(HookRenderBlockEvent $event)
     {
+        $product = ProductQuery::create()->findPk($event->getArgument('id'));
+        if ($product->getTemplate() === null) {
+            $content = $this->render('product-edit-tab-legacy-product-attributes-no-template.html');
+        } else {
+            $content = $this->render('product-edit-tab-legacy-product-attributes.html');
+        }
+
         $event->add([
             'id' => 'legacy-product-attributes',
             'title' => Translator::getInstance()->trans(
@@ -27,7 +35,7 @@ class BackHook extends BaseHook
                 [],
                 LegacyProductAttributes::MESSAGE_DOMAIN_BO
             ),
-            'content' => $this->render('product-edit-tab-legacy-product-attributes.html'),
+            'content' => $content,
         ]);
     }
 

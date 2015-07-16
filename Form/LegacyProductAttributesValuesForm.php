@@ -57,6 +57,10 @@ class LegacyProductAttributesValuesForm extends BaseForm
         }
         $product = ProductQuery::create()->findPk($productId);
 
+        if ($product->getTemplate() === null) {
+            return;
+        }
+
         $currencyId = $this->request->get('edit_currency_id');
         if ($currencyId === null) {
             $defaultCurrency = CurrencyQuery::create()->findOneByByDefault(true);
