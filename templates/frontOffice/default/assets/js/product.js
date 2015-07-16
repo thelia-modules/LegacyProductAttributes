@@ -34,8 +34,7 @@
     });
 
     $(document).ajaxSuccess(function (event, xhr, settings) {
-        // addCartMessageUrl is initialized in layout.tpl
-        if (settings.url.split(/[?#]/)[0] != addCartMessageUrl) {
+        if (settings.url.split(/[?#]/)[0] != '{url path="ajax/addCartMessage"}') {
             return;
         }
 
