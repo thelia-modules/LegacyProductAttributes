@@ -29,7 +29,9 @@
             }
 
             <div class="form-group">
-                <label for="use_prices_with_tax">Use prices with taxes</label>
+                <label for="use_prices_with_tax">
+                    {intl l='Edit prices with taxes' d='legacyproductattributes.bo.default'}
+                </label>
                 <input id="use_prices_with_tax" type="checkbox" checked>
             </div>
 
@@ -63,7 +65,9 @@
                                                 field='legacy_product_attribute_value_price_delta'
                                                 value_key=$ID
                                                 }
-                                                    <label>Price supplement excluding taxes:</label>
+                                                    <label for="legacy-attribute-{$ID}-price-delta">
+                                                        {$label}
+                                                    </label>
                                                     <div class="input-group">
                                                         <input id="legacy-attribute-{$ID}-price-delta"
                                                                name="{$name}"
@@ -82,7 +86,9 @@
                                                 field='legacy_product_attribute_value_price_delta_with_tax'
                                                 value_key=$ID
                                                 }
-                                                    <label>Price supplement including taxes:</label>
+                                                    <label for="legacy-attribute-{$ID}-price-delta-with-tax">
+                                                        {$label}
+                                                    </label>
                                                     <div class="input-group">
                                                         <input id="legacy-attribute-{$ID}-price-delta-with-tax"
                                                                name="{$name}"

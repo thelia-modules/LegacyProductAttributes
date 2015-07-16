@@ -2,8 +2,10 @@
 
 namespace LegacyProductAttributes\Form;
 
+use LegacyProductAttributes\LegacyProductAttributes;
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery;
 use Symfony\Component\Validator\Constraints\NotBlank;
+use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
 use Thelia\Model\AttributeAv;
 use Thelia\Model\AttributeAvQuery;
@@ -30,7 +32,7 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 'product_id',
                 'integer',
                 [
-                    'label' => 'Product id',
+                    'label' => Translator::getInstance()->trans('Product'),
                     'required' => true,
                     'constraints' => [
                         new NotBlank(),
@@ -41,7 +43,7 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 'currency_id',
                 'integer',
                 [
-                    'label' => 'Currency id',
+                    'label' => Translator::getInstance()->trans('Currency'),
                     'required' => true,
                     'constraints' => [
                         new NotBlank(),
@@ -107,7 +109,11 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 'legacy_product_attribute_value_price_delta',
                 'collection',
                 [
-                    'label' => 'Price supplement excluding taxes',
+                    'label' => Translator::getInstance()->trans(
+                        'Price difference excluding taxes',
+                        [],
+                        LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                    ),
                     'type' => 'number',
                     'allow_add' => true,
                     'allow_delete' => true,
@@ -118,7 +124,11 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 'legacy_product_attribute_value_price_delta_with_tax',
                 'collection',
                 [
-                    'label' => 'Price supplement including taxes',
+                    'label' => Translator::getInstance()->trans(
+                        'Price difference including taxes',
+                        [],
+                        LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                    ),
                     'type' => 'number',
                     'allow_add' => true,
                     'allow_delete' => true,

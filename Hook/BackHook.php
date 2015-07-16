@@ -2,9 +2,11 @@
 
 namespace LegacyProductAttributes\Hook;
 
+use LegacyProductAttributes\LegacyProductAttributes;
 use Thelia\Core\Event\Hook\HookRenderBlockEvent;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
+use Thelia\Core\Translation\Translator;
 
 /**
  * Back-office hooks.
@@ -20,7 +22,11 @@ class BackHook extends BaseHook
     {
         $event->add([
             'id' => 'legacy-product-attributes',
-            'title' => 'Legacy attributes',
+            'title' => Translator::getInstance()->trans(
+                'Attributes configuration',
+                [],
+                LegacyProductAttributes::MESSAGE_DOMAIN_BO
+            ),
             'content' => $this->render('product-edit-tab-legacy-product-attributes.html'),
         ]);
     }
