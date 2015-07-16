@@ -9,8 +9,6 @@
     }
 
     function setLegacyProductAttributesPrices($promo, $old) {
-        console.log('-');
-
         $
             .ajax({
                 type: 'POST',
