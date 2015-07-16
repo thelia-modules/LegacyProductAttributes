@@ -17,6 +17,7 @@
     <hooks>
         <hook id="legacy_product_attributes.hook.back" class="LegacyProductAttributes\Hook\BackHook" scope="request">
             <tag name="hook.event_listener" type="backoffice" event="product.tab"/>
+            <tag name="hook.event_listener" type="backoffice" event="product.edit-js"/>
         </hook>
         <hook id="legacy_product_attributes.hook.front" class="LegacyProductAttributes\Hook\FrontHook" scope="request">
             <tag name="hook.event_listener" type="frontoffice" event="product.javascript-initialization"/>

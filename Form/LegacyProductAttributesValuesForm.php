@@ -3,13 +3,14 @@
 namespace LegacyProductAttributes\Form;
 
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery;
-use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Form\BaseForm;
 use Thelia\Model\AttributeAv;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\CurrencyQuery;
 use Thelia\Model\ProductQuery;
+use Thelia\TaxEngine\Calculator;
+use Thelia\TaxEngine\TaxEngine;
 
 class LegacyProductAttributesValuesForm extends BaseForm
 {
@@ -66,7 +67,12 @@ class LegacyProductAttributesValuesForm extends BaseForm
 
         $formData = [
             'price_delta' => [],
+            'price_delta_with_tax' => [],
         ];
+
+        /** @var TaxEngine $taxEngine */
+        $taxEngine = $this->container->get('thelia.taxEngine');
+        $taxCalculator = (new Calculator())->load($product, $taxEngine->getDeliveryCountry());
 
         /** @var AttributeAv $productAttributeAv */
         foreach ($productAttributeAvs as $productAttributeAv) {
@@ -78,7 +84,12 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 ]);
 
             $formData['price_delta'][$productAttributeAv->getId()] =
-                ($legacyProductAttributeValuePrice !== null) ? $legacyProductAttributeValuePrice->getDelta() : 0;
+                ($legacyProductAttributeValuePrice !== null) ?
+                    $legacyProductAttributeValuePrice->getDelta() : 0;
+
+            $formData['price_delta_with_tax'][$productAttributeAv->getId()] =
+                ($legacyProductAttributeValuePrice !== null) ?
+                    $taxCalculator->getTaxedPrice($legacyProductAttributeValuePrice->getDelta()) : 0;
         }
 
         $this->formBuilder
@@ -86,10 +97,22 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 'legacy_product_attribute_value_price_delta',
                 'collection',
                 [
+                    'label' => 'Price supplement excluding taxes',
                     'type' => 'number',
                     'allow_add' => true,
                     'allow_delete' => true,
                     'data' => $formData['price_delta'],
+                ]
+            )
+            ->add(
+                'legacy_product_attribute_value_price_delta_with_tax',
+                'collection',
+                [
+                    'label' => 'Price supplement including taxes',
+                    'type' => 'number',
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'data' => $formData['price_delta_with_tax'],
                 ]
             );
     }

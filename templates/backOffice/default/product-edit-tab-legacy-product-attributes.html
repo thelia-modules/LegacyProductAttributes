@@ -1,6 +1,7 @@
 <div class="form-container">
     {form name='legacy_product_attributes_form_legacy_product_attributes_values'}
-        <form method="post" action="{url path='/admin/module/LegacyProductAttributes/attributes_values'}" {form_enctype form=$form}>
+        <form method="post"
+              action="{url path='/admin/module/LegacyProductAttributes/attributes_values'}" {form_enctype form=$form}>
             {form_field form=$form field='product_id'}
                 <input name="{$name}" value="{product attr='id'}" type="hidden">
             {/form_field}
@@ -27,6 +28,11 @@
             close_url = {url path='/admin/categories' category_id={category attr='id'}}
             }
 
+            <div class="form-group">
+                <label for="use_prices_with_tax">Use prices with taxes</label>
+                <input id="use_prices_with_tax" type="checkbox" checked>
+            </div>
+
             <div class="row">
                 {loop
                 name='legacy_product_attributes.attributes'
@@ -51,17 +57,42 @@
                                             <div class="title">
                                                 {$TITLE}
                                             </div>
-                                            <div class="form-group">
+                                            <div class="form-group legacy-attributes-price without-tax">
                                                 {form_field
                                                 form=$form
                                                 field='legacy_product_attribute_value_price_delta'
                                                 value_key=$ID
                                                 }
-                                                <label>Price supplement excluding taxes:</label>
-                                                <div class="input-group">
-                                                <input name="{$name}" value="{$value}" type="number" class="form-control">
-                                                <span class="input-group-addon">{$currency_symbol}</span>
-                                                </div>
+                                                    <label>Price supplement excluding taxes:</label>
+                                                    <div class="input-group">
+                                                        <input id="legacy-attribute-{$ID}-price-delta"
+                                                               name="{$name}"
+                                                               value="{$value}"
+                                                               type="text"
+                                                               class="price_field automatic_price_field form-control"
+                                                               data-rel-price="legacy-attribute-{$ID}-price-delta-with-tax"
+                                                               data-price-type="price-without-tax">
+                                                        <span class="input-group-addon">{$currency_symbol}</span>
+                                                    </div>
+                                                {/form_field}
+                                            </div>
+                                            <div class="form-group legacy-attributes-price with-tax">
+                                                {form_field
+                                                form=$form
+                                                field='legacy_product_attribute_value_price_delta_with_tax'
+                                                value_key=$ID
+                                                }
+                                                    <label>Price supplement including taxes:</label>
+                                                    <div class="input-group">
+                                                        <input id="legacy-attribute-{$ID}-price-delta-with-tax"
+                                                               name="{$name}"
+                                                               value="{$value}"
+                                                               type="text"
+                                                               class="price_field automatic_price_field form-control"
+                                                               data-rel-price="legacy-attribute-{$ID}-price-delta"
+                                                               data-price-type="price-with-tax">
+                                                        <span class="input-group-addon">{$currency_symbol}</span>
+                                                    </div>
                                                 {/form_field}
                                             </div>
                                         </td>
