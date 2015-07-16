@@ -39,7 +39,7 @@
             return;
         }
 
-        $bootbox = $('.bootbox');
+        var $bootbox = $('.bootbox');
 
         setLegacyProductAttributesPrices(
             $bootbox.find('.special-price').find('.price'),
