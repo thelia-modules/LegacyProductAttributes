@@ -5,7 +5,7 @@
             {$product_id = {product attr='id'}}
 
             {form_field form=$form field='product_id'}
-                <input name="{$name}" value="$product_id" type="hidden">
+                <input name="{$name}" value="{$product_id}" type="hidden">
             {/form_field}
 
             {loop type='currency' name='product-currency' id=$edit_currency_id}
