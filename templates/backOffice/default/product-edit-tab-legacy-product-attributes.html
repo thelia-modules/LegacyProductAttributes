@@ -2,8 +2,10 @@
     {form name='legacy_product_attributes_form_legacy_product_attributes_values'}
         <form method="post"
               action="{url path='/admin/module/LegacyProductAttributes/attributes_values'}" {form_enctype form=$form}>
+            {$product_id = {product attr='id'}}
+
             {form_field form=$form field='product_id'}
-                <input name="{$name}" value="{product attr='id'}" type="hidden">
+                <input name="{$name}" value="$product_id" type="hidden">
             {/form_field}
 
             {loop type='currency' name='product-currency' id=$edit_currency_id}
@@ -15,18 +17,38 @@
             {/loop}
 
             {form_field form=$form field='success_url'}
-                <input name="{$name}" value="{navigate to='current'}" type="hidden">
+                <input name="{$name}" value="{navigate to='current' current_tab='legacy-product-attributes'}" type="hidden">
             {/form_field}
 
             {form_hidden_fields form=$form}
 
-            {include
-            file = 'includes/inner-form-toolbar.html'
-            hide_flags = true
-            show_currencies = true
-            page_url = {url path='/admin/products/update' product_id={product attr='id'}}
-            close_url = {url path='/admin/categories' category_id={category attr='id'}}
-            }
+            {$page_url = {url path='/admin/products/update' product_id=$product_id current_tab='legacy-product-attributes'}}
+            {$close_url = {url path='/admin/categories' category_id={category attr='id'}}}
+
+            <div class="row inner-toolbar">
+                <div class="col-md-3 inner-actions">
+                </div>
+
+                <div class="col-md-3 inner-actions">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="button-group">
+                                {loop name="currency_list" type="currency"}
+                                    <a class="btn btn-sm {if $ID == $edit_currency_id}btn-primary{else}btn-default{/if}" href="{url noamp=1 path={$page_url|default:$current_url nofilter} edit_currency_id=$ID}" title="{intl l='Edit prices in %curr' curr={$NAME}}">
+                                        {$SYMBOL}
+                                    </a>
+                                {/loop}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6 inner-actions text-right">
+                    <button type="submit" name="save_mode" value="stay" class="form-submit-button btn btn-sm btn-default btn-success" title="{intl l='Save'}">{intl l='Save'} <span class="glyphicon glyphicon-ok"></span></button>
+                    <button type="submit" name="save_mode" value="close" class="form-submit-button btn btn-sm btn-default btn-info" title="{intl l='Save and close'}">{intl l='Save and close'} <span class="glyphicon glyphicon-remove"></span></button>
+                    <a href="{$close_url nofilter}" class="page-close-button btn btn-sm btn-default">{intl l='Close'} <span class="glyphicon glyphicon-remove"></span></a>
+                </div>
+            </div>
 
             <div class="form-group">
                 <label for="use_prices_with_tax">
@@ -39,7 +61,7 @@
                 {loop
                 name='legacy_product_attributes.attributes'
                 type='attribute'
-                product={product attr='id'}
+                product=$product_id
                 }
                     <div class="col-md-3">
                         <div class="well well-sm">
