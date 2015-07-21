@@ -34,7 +34,12 @@
     });
 
     $(document).ajaxSuccess(function (event, xhr, settings) {
-        if (settings.url.split(/[?#]/)[0] != '{url path="ajax/addCartMessage"}') {
+        // Thelia 2.2 defines addCartMessageUrl, Thelia 2.1 hardcodes it
+        if (typeof addCartMessageUrl == 'undefined') {
+            addCartMessageUrl = 'ajax/addCartMessage';
+        }
+
+        if (settings.url.split(/[?#]/)[0] != addCartMessageUrl) {
             return;
         }
 
