@@ -84,7 +84,7 @@ class ProductController extends BaseFrontController
 
             return new JsonResponse($response);
         } catch (FormValidationException $e) {
-            return JsonResponse::createError('Invalid form', 400);
+            return JsonResponse::createError($e->getMessage(), 400);
         }
     }
 
