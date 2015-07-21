@@ -30,6 +30,12 @@ class ProductController extends BaseFrontController
     {
         $baseForm = $this->createForm('thelia.cart.add');
 
+        // make the quantity field a dummy field so that we can ignore it
+        // (we want to be able to update prices on out-of-stock products),
+        // while still validating the rest of the form
+        $baseForm->getForm()->remove('quantity');
+        $baseForm->getForm()->add('quantity', 'number', ['mapped' => false]);
+
         try {
             $form = $this->validateForm($baseForm, 'POST');
 
