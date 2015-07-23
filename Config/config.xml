@@ -7,6 +7,9 @@
     <loops>
         <loop name="legacy_cart_item_attribute_combination"
               class="LegacyProductAttributes\Loop\LegacyCartItemAttributeCombinationLoop"/>
+
+        <loop name="product"
+              class="LegacyProductAttributes\Loop\ProductLoop"/>
     </loops>
 
     <forms>
@@ -20,7 +23,9 @@
             <tag name="hook.event_listener" type="backoffice" event="product.edit-js"/>
         </hook>
         <hook id="legacy_product_attributes.hook.front" class="LegacyProductAttributes\Hook\FrontHook" scope="request">
+            <tag name="hook.event_listener" type="frontoffice" event="category.javascript-initialization"/>
             <tag name="hook.event_listener" type="frontoffice" event="product.javascript-initialization"/>
+            <tag name="hook.event_listener" type="frontoffice" event="singleproduct.bottom"/>
             <tag name="hook.event_listener" type="frontoffice" event="cart.javascript-initialization"/>
         </hook>
     </hooks>

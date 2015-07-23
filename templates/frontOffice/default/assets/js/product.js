@@ -1,14 +1,38 @@
 (function ($) {
-    var $insert = $('#form-product-details-legacy-product-attributes');
-    var $formProductDetails = $('#form-product-details');
+    function initFormProductDetails() {
+        var $formProductDetails = $('#form-product-details');
 
-    if ($insert.length) {
-        $formProductDetails
-            .find('fieldset:eq(-0)')
-            .before($insert.html());
+        var productId = $formProductDetails.find('input[name="product_id"]').val();
+        var $insert = $('.form-product-details-legacy-product-attributes[data-product="'+productId+'"]');
+
+        if ($insert.length) {
+            $formProductDetails
+                .find('fieldset:eq(-0)')
+                .before($insert.html());
+
+            $('#pse-options').hide();
+        }
+
+        $formProductDetails.on('change', '.pse-option', function () {
+            setLegacyProductAttributesPrices($formProductDetails, $('#pse-price'), $('#pse-price-old'));
+        });
     }
 
-    function setLegacyProductAttributesPrices($promo, $old) {
+    initFormProductDetails();
+
+    $('.product-quickview').each(function () {
+        var productUrl = $(this).attr('href');
+
+        $(document).ajaxSuccess(function (event, xhr, settings) {
+            if (settings.url != productUrl) {
+                return;
+            }
+
+            initFormProductDetails();
+        });
+    });
+
+    function setLegacyProductAttributesPrices($formProductDetails, $promo, $old) {
         $
             .ajax({
                 type: 'POST',
@@ -29,10 +53,6 @@
             });
     }
 
-    $formProductDetails.on('change', '.pse-option', function () {
-        setLegacyProductAttributesPrices( $('#pse-price'), $('#pse-price-old'));
-    });
-
     $(document).ajaxSuccess(function (event, xhr, settings) {
         // Thelia 2.2 defines addCartMessageUrl, Thelia 2.1 hardcodes it
         if (typeof addCartMessageUrl == 'undefined') {
@@ -44,10 +64,14 @@
         }
 
         var $bootbox = $('.bootbox');
+        var $formProductDetails = $('#form-product-details');
 
-        setLegacyProductAttributesPrices(
-            $bootbox.find('.special-price').find('.price'),
-            $bootbox.find('.old-price').find('.price')
-        );
+        if ($formProductDetails.length > 0) {
+            setLegacyProductAttributesPrices(
+                $formProductDetails,
+                $bootbox.find('.special-price').find('.price'),
+                $bootbox.find('.old-price').find('.price')
+            );
+        }
     });
 })(jQuery);
