@@ -11,16 +11,17 @@
                 .before($insert.html());
 
             $('#pse-options').hide();
-            $('#pse-name').hide();
         }
-
 
         var $psePrice = $('#pse-price');
         var $psePriceOld = $('#pse-price-old');
 
-        setLegacyProductAttributesPrices($formProductDetails, $psePrice, $psePriceOld);
+        setProductPrices($formProductDetails, $psePrice, $psePriceOld);
+        setProductPseName();
+
         $formProductDetails.on('change', '.pse-option', function () {
-            setLegacyProductAttributesPrices($formProductDetails, $psePrice, $psePriceOld);
+            setProductPrices($formProductDetails, $psePrice, $psePriceOld);
+            setProductPseName();
         });
     }
 
@@ -38,7 +39,7 @@
         });
     });
 
-    function setLegacyProductAttributesPrices($formProductDetails, $promo, $old) {
+    function setProductPrices($formProductDetails, $promo, $old) {
         $
             .ajax({
                 type: 'POST',
@@ -59,6 +60,23 @@
             });
     }
 
+    function setProductPseName() {
+        var name = ' - ';
+
+        var firstAttribute = true;
+        $('.legacy-product-attribute').each(function () {
+            if (!firstAttribute) {
+                name += ', ';
+            } else {
+                firstAttribute = false;
+            }
+
+            name += $(this).find('option:selected').html();
+        });
+
+        $('#pse-name').html(name);
+    }
+
     $(document).ajaxSuccess(function (event, xhr, settings) {
         // Thelia 2.2 defines addCartMessageUrl, Thelia 2.1 hardcodes it
         if (typeof addCartMessageUrl == 'undefined') {
@@ -73,7 +91,7 @@
         var $formProductDetails = $('#form-product-details');
 
         if ($formProductDetails.length > 0) {
-            setLegacyProductAttributesPrices(
+            setProductPrices(
                 $formProductDetails,
                 $bootbox.find('.special-price').find('.price'),
                 $bootbox.find('.old-price').find('.price')

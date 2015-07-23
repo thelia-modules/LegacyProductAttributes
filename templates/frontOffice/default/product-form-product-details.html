@@ -12,7 +12,7 @@
                 {form_field form=$form field="legacy_product_attribute_{$ID}"}
                 <label for="option-{$ID}" class="option-heading">{$TITLE}</label>
                 <div class="option-content">
-                    <select id="option-{$ID}" name="{$name}" class="form-control pse-option">
+                    <select id="option-{$ID}" name="{$name}" class="form-control pse-option legacy-product-attribute">
                         {foreach $choices as $choice}
                             <option value="{$choice->value}">{$choice->label}</option>
                         {/foreach}
