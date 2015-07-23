@@ -2,6 +2,8 @@
 
 namespace LegacyProductAttributes\Hook;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\ProductCheckEvent;
 use LegacyProductAttributes\LegacyProductAttributes;
 use Thelia\Core\Event\Hook\HookRenderBlockEvent;
 use Thelia\Core\Event\Hook\HookRenderEvent;
@@ -22,7 +24,16 @@ class BackHook extends BaseHook
     public function onProductTab(HookRenderBlockEvent $event)
     {
         $product = ProductQuery::create()->findPk($event->getArgument('id'));
-        if ($product->getTemplate() === null) {
+
+        $productCheckEvent = new ProductCheckEvent($this->getRequest()->getProductId());
+        $this->dispatcher->dispatch(
+            LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY,
+            $productCheckEvent
+        );
+
+        if (!$productCheckEvent->getResult()) {
+            $content = $this->render('product-edit-tab-legacy-product-attributes-does-not-apply.html');
+        } elseif ($product->getTemplate() === null) {
             $content = $this->render('product-edit-tab-legacy-product-attributes-no-template.html');
         } else {
             $content = $this->render('product-edit-tab-legacy-product-attributes.html');

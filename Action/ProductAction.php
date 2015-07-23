@@ -3,6 +3,7 @@
 namespace LegacyProductAttributes\Action;
 
 use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\ProductCheckEvent;
 use LegacyProductAttributes\Event\ProductGetPricesEvent;
 use LegacyProductAttributes\Model\LegacyProductAttributeValue;
 use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
@@ -20,8 +21,28 @@ class ProductAction implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
+            LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY
+            => ['checkLegacyAttributesApply', 128],
             LegacyProductAttributesEvents::PRODUCT_GET_PRICES => ['getPrices', 128],
         ];
+    }
+
+    /**
+     * Check if a product uses the legacy attributes system.
+     *
+     * @param ProductCheckEvent $event
+     */
+    public function checkLegacyAttributesApply(ProductCheckEvent $event)
+    {
+        $product = ProductQuery::create()->findPk($event->getProductId());
+        if (null === $product) {
+            throw new \InvalidArgumentException('No product given');
+        }
+
+        $event->setResult(
+            ($product->countSaleElements() == 1)
+            && ($product->getDefaultSaleElements()->countAttributeCombinations() == 0)
+        );
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace LegacyProductAttributes\Loop;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\ProductCheckEvent;
 use Thelia\Core\Template\Element\LoopResult;
 use Thelia\Core\Template\Element\LoopResultRow;
 use Thelia\Core\Template\Loop\Product as BaseProductLoop;
@@ -23,17 +25,19 @@ class ProductLoop extends BaseProductLoop
             if ($loopResultRow->get('PSE_COUNT') === null) {
                 continue;
             }
-            //  do nothing if the count is more than one (we don't use legacy attributes for this product)
-            if ($loopResultRow->get('PSE_COUNT') > 1) {
-                continue;
-            }
 
             $product = ProductQuery::create()->findPk($loopResultRow->get('ID'));
 
-            // do nothing if the product has a PSE that is not the default one (i.e. with an attribute combination)
-            if ($product->getDefaultSaleElements()->countAttributeCombinations() > 0) {
+            //  do nothing if we don't use legacy attributes for this product
+            $productCheckEvent = new ProductCheckEvent($product->getId());
+            $this->dispatcher->dispatch(
+                LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY,
+                $productCheckEvent
+            );
+            if (!$productCheckEvent->getResult()) {
                 continue;
             }
+
             // nothing to do if the product has no template (and thus no attributes)
             if ($product->getTemplate() === null) {
                 continue;

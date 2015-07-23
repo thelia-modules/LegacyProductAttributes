@@ -2,6 +2,8 @@
 
 namespace LegacyProductAttributes\Hook;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\ProductCheckEvent;
 use Thelia\Core\Event\Hook\HookRenderEvent;
 use Thelia\Core\Hook\BaseHook;
 
@@ -30,6 +32,15 @@ class FrontHook extends BaseHook
      */
     public function onProductJavascriptInitialization(HookRenderEvent $event)
     {
+        $productCheckEvent = new ProductCheckEvent($this->getRequest()->getProductId());
+        $this->dispatcher->dispatch(
+            LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY,
+            $productCheckEvent
+        );
+        if (!$productCheckEvent->getResult()) {
+            return;
+        }
+
         $event->add($this->render('product-form-product-details.html'));
 
         // this javascript file is rendered because it contains smarty content
@@ -45,13 +56,24 @@ class FrontHook extends BaseHook
      */
     public function onSingleproductBottom(HookRenderEvent $event)
     {
+        $productId = $event->getArgument('product');
+
+        $productCheckEvent = new ProductCheckEvent($productId);
+        $this->dispatcher->dispatch(
+            LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY,
+            $productCheckEvent
+        );
+        if (!$productCheckEvent->getResult()) {
+            return;
+        }
+
         // add the product id to the request so that the form extension can add the required fields
-        $this->getRequest()->query->set('product_id', $event->getArgument('product'));
+        $this->getRequest()->query->set('product_id', $productId);
 
         $event->add($this->render(
             'product-form-product-details.html',
             [
-                'product_id' => $event->getArgument('product'),
+                'product_id' => $productId,
             ]
         ));
 
