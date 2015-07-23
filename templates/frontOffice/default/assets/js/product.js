@@ -11,6 +11,7 @@
                 .before($insert.html());
 
             $('#pse-options').hide();
+            $('#pse-name').hide();
         }
 
         $formProductDetails.on('change', '.pse-option', function () {
