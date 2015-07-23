@@ -14,8 +14,13 @@
             $('#pse-name').hide();
         }
 
+
+        var $psePrice = $('#pse-price');
+        var $psePriceOld = $('#pse-price-old');
+
+        setLegacyProductAttributesPrices($formProductDetails, $psePrice, $psePriceOld);
         $formProductDetails.on('change', '.pse-option', function () {
-            setLegacyProductAttributesPrices($formProductDetails, $('#pse-price'), $('#pse-price-old'));
+            setLegacyProductAttributesPrices($formProductDetails, $psePrice, $psePriceOld);
         });
     }
 

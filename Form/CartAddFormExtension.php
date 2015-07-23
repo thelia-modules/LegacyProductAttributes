@@ -85,6 +85,7 @@ class CartAddFormExtension implements EventSubscriberInterface
                     'choice',
                     [
                         'choices' => $choices,
+                        'required' => true,
                     ]
                 );
         }
