@@ -1,4 +1,7 @@
 (function ($) {
+    // deactivate the Thelia PSE manager (kinda...)
+    PSE_COUNT = 1;
+
     function initFormProductDetails() {
         var $formProductDetails = $('#form-product-details');
 
