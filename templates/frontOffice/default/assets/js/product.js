@@ -77,6 +77,19 @@
         $('#pse-name').html(name);
     }
 
+    function setBootboxProductOptions() {
+        var content = '';
+
+        $('.legacy-product-attribute').each(function () {
+            var attributeName = $('label[for="'+$(this).attr('id')+'"]').html();
+            var attributeValue = $(this).find('option:selected').html();
+
+            content += '<p>' + attributeName + ' : ' + attributeValue + '</p>';
+        });
+
+        $('.bootbox').find('table:eq(0)').find('tr:eq(1)').find('td:eq(1)').find('h2').after(content);
+    }
+
     $(document).ajaxSuccess(function (event, xhr, settings) {
         // Thelia 2.2 defines addCartMessageUrl, Thelia 2.1 hardcodes it
         if (typeof addCartMessageUrl == 'undefined') {
@@ -96,6 +109,7 @@
                 $bootbox.find('.special-price').find('.price'),
                 $bootbox.find('.old-price').find('.price')
             );
+            setBootboxProductOptions();
         }
     });
 })(jQuery);
