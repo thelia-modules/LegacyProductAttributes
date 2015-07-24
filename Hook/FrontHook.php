@@ -87,7 +87,17 @@ class FrontHook extends BaseHook
     public function onCartJavascriptInitialization(HookRenderEvent $event)
     {
         $event->add($this->render('cart-product-options.html'));
+        $event->add($this->addJS('assets/js/cart.js'));
+    }
 
+    /**
+     * Insert the cart view extensions, and the javascript to insert them.
+     *
+     * @param HookRenderEvent $event
+     */
+    public function onOrderInvoiceJavascriptInitialization(HookRenderEvent $event)
+    {
+        $event->add($this->render('cart-product-options.html'));
         $event->add($this->addJS('assets/js/cart.js'));
     }
 }

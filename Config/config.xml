@@ -27,6 +27,7 @@
             <tag name="hook.event_listener" type="frontoffice" event="product.javascript-initialization"/>
             <tag name="hook.event_listener" type="frontoffice" event="singleproduct.bottom"/>
             <tag name="hook.event_listener" type="frontoffice" event="cart.javascript-initialization"/>
+            <tag name="hook.event_listener" type="frontoffice" event="order-invoice.javascript-initialization"/>
         </hook>
     </hooks>
 

@@ -1,17 +1,9 @@
 (function($) {
-    var $cart = $('#cart');
+    var $inserts = $('.legacy-product-attributes-cart-item-attribute-combination');
+    var i = 0;
 
-    $cart.find('tbody').find('tr').each(function() {
-        var cartItemId = $(this).find('td.qty').find('form').find('input[name="cart_item"]').val();
-
-        if (typeof cartItemId == 'undefined') {
-            return;
-        }
-
-        var cartItemOptionsContent =
-            $('.legacy-product-attributes-cart-item-attribute-combination[data-cart-item="'+cartItemId+'"]')
-            .html();
-
-        $(this).find('.product-options').find('dl').append(cartItemOptionsContent);
+    $('.table-cart').find('tbody').find('tr').each(function() {
+        $(this).find('.product-options').find('dl').append($($inserts.get(i)).html());
+        ++i;
     });
 })(jQuery);
