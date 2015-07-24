@@ -52,8 +52,10 @@
         </service>
 
         <service id="legacy_product_attributes.listener.order"
-                 class="LegacyProductAttributes\EventListeners\OrderAction">
+                 class="LegacyProductAttributes\EventListeners\OrderAction"
+                 scope="request">
             <tag name="kernel.event_subscriber"/>
+            <argument type="service" id="request"/>
         </service>
     </services>
 

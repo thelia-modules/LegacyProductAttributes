@@ -9,14 +9,31 @@ use Propel\Runtime\Exception\PropelException;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Order\OrderEvent;
 use Thelia\Core\Event\TheliaEvents;
+use Thelia\Core\HttpFoundation\Request;
+use Thelia\Model\Attribute;
+use Thelia\Model\AttributeAv;
 use Thelia\Model\OrderProductAttributeCombination;
 use Thelia\Model\OrderProductQuery;
+use Thelia\Tools\I18n;
 
 /**
  * Listener for order related events.
  */
 class OrderAction implements EventSubscriberInterface
 {
+    /**
+     * @var Request
+     */
+    protected $request;
+
+    /**
+     * @param Request $request
+     */
+    public function __construct(Request $request)
+    {
+        $this->request = $request;
+    }
+
     public static function getSubscribedEvents()
     {
         return [
@@ -59,10 +76,23 @@ class OrderAction implements EventSubscriberInterface
                 ->getId();
         }
 
+        $lang = $this->request->getSession()->getLang();
+
         /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
         foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
-            $attribute = $legacyCartItemAttributeCombination->getAttribute();
-            $attributeAv = $legacyCartItemAttributeCombination->getAttributeAv();
+            /** @var Attribute $attribute */
+            $attribute = I18n::forceI18nRetrieving(
+                $lang->getLocale(),
+                'Attribute',
+                $legacyCartItemAttributeCombination->getAttributeId()
+            );
+
+            /** @var AttributeAv $attributeAv */
+            $attributeAv = I18n::forceI18nRetrieving(
+                $lang->getLocale(),
+                'AttributeAv',
+                $legacyCartItemAttributeCombination->getAttributeAvId()
+            );
 
             (new OrderProductAttributeCombination())
                 ->setOrderProductId($orderProductId)
