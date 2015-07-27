@@ -57,7 +57,7 @@ class CartAddFormExtension implements EventSubscriberInterface
         }
 
         $product = ProductQuery::create()->findPk($this->request->getProductId());
-        if ($product === null) {
+        if ($product === null || $product->getTemplate() === null) {
             return;
         }
 
