@@ -64,14 +64,18 @@ class OrderAction implements EventSubscriberInterface
             // such as PSE id to cross reference the cart item we are given to the order product that was created from
             // it (as far as I can tell).
 
-            // So we will ASSUME that the last created order product is the one created from this cart item.
+            // So we will ASSUME that the order product with the higher id is the one created from this cart item.
             // This is PROBABLY TRUE on a basic Thelia install with no modules messing with the cart and orders in a way
             // that create additional order products, BUT NOT IN GENERAL !
+            // This also assumes that ids are generated incrementally, which is NOT GUARANTEED (but true for MySQL
+            // with default settings).
+
+            // The creation date was previously used but is even less reliable.
 
             // FIXME: THIS IS NOT A SANE WAY TO DO THIS
 
             $orderProductId = OrderProductQuery::create()
-                ->orderByCreatedAt(Criteria::DESC)
+                ->orderById(Criteria::DESC)
                 ->findOne()
                 ->getId();
         }
