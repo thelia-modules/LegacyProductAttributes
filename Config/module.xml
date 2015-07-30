@@ -5,9 +5,11 @@
     <fullnamespace>LegacyProductAttributes\LegacyProductAttributes</fullnamespace>
     <descriptive locale="en_US">
         <title>Legacy product attributes</title>
+        <subtitle>Thelia 1-style product attributes management</subtitle>
     </descriptive>
     <descriptive locale="fr_FR">
         <title>Anciennes déclinaisons de produits</title>
+        <subtitle>Déclinaisons de produits à la Thelia 1</subtitle>
     </descriptive>
     <languages>
         <language>en_US</language>
