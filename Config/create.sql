@@ -7,9 +7,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- legacy_product_attribute_value
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `legacy_product_attribute_value`;
-
-CREATE TABLE `legacy_product_attribute_value`
+CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value`
 (
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
@@ -31,9 +29,7 @@ CREATE TABLE `legacy_product_attribute_value`
 -- legacy_product_attribute_value_price
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `legacy_product_attribute_value_price`;
-
-CREATE TABLE `legacy_product_attribute_value_price`
+CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value_price`
 (
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
@@ -63,9 +59,7 @@ CREATE TABLE `legacy_product_attribute_value_price`
 -- legacy_cart_item_attribute_combination
 -- ---------------------------------------------------------------------
 
-DROP TABLE IF EXISTS `legacy_cart_item_attribute_combination`;
-
-CREATE TABLE `legacy_cart_item_attribute_combination`
+CREATE TABLE IF NOT EXISTS `legacy_cart_item_attribute_combination`
 (
     `cart_item_id` INTEGER NOT NULL,
     `attribute_id` INTEGER NOT NULL,
