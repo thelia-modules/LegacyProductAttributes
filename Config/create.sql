@@ -7,10 +7,15 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- legacy_product_attribute_value
 -- ---------------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value`
+DROP TABLE IF EXISTS `legacy_product_attribute_value`;
+
+CREATE TABLE `legacy_product_attribute_value`
 (
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
+    `weight_delta` FLOAT DEFAULT 0 NOT NULL,
+    `stock` INTEGER DEFAULT 0,
+    `visible` TINYINT(1) DEFAULT 1,
     PRIMARY KEY (`product_id`,`attribute_av_id`),
     INDEX `legacy_product_attribute_value_FI_2` (`attribute_av_id`),
     CONSTRAINT `legacy_product_attribute_value_FK_1`
@@ -29,12 +34,14 @@ CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value`
 -- legacy_product_attribute_value_price
 -- ---------------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value_price`
+DROP TABLE IF EXISTS `legacy_product_attribute_value_price`;
+
+CREATE TABLE `legacy_product_attribute_value_price`
 (
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
     `currency_id` INTEGER NOT NULL,
-    `delta` FLOAT DEFAULT 0,
+    `delta` DECIMAL(16,6) DEFAULT 0.000000,
     PRIMARY KEY (`product_id`,`attribute_av_id`,`currency_id`),
     INDEX `legacy_product_attribute_value_price_FI_2` (`attribute_av_id`),
     INDEX `legacy_product_attribute_value_price_FI_3` (`currency_id`),
@@ -59,7 +66,9 @@ CREATE TABLE IF NOT EXISTS `legacy_product_attribute_value_price`
 -- legacy_cart_item_attribute_combination
 -- ---------------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `legacy_cart_item_attribute_combination`
+DROP TABLE IF EXISTS `legacy_cart_item_attribute_combination`;
+
+CREATE TABLE `legacy_cart_item_attribute_combination`
 (
     `cart_item_id` INTEGER NOT NULL,
     `attribute_id` INTEGER NOT NULL,
@@ -78,6 +87,32 @@ CREATE TABLE IF NOT EXISTS `legacy_cart_item_attribute_combination`
         ON UPDATE RESTRICT
         ON DELETE CASCADE,
     CONSTRAINT `legacy_cart_item_attribute_combination_FK_3`
+        FOREIGN KEY (`attribute_av_id`)
+        REFERENCES `attribute_av` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------
+-- legacy_order_product_attribute_combination
+-- ---------------------------------------------------------------------
+
+DROP TABLE IF EXISTS `legacy_order_product_attribute_combination`;
+
+CREATE TABLE `legacy_order_product_attribute_combination`
+(
+    `order_product_id` INTEGER NOT NULL,
+    `product_id` INTEGER NOT NULL,
+    `attribute_av_id` INTEGER NOT NULL,
+    `quantity` INTEGER NOT NULL,
+    INDEX `legacy_order_product_attribute_combination_I_1` (`order_product_id`),
+    INDEX `legacy_order_product_attribute_combination_FI_2` (`attribute_av_id`),
+    CONSTRAINT `legacy_order_product_attribute_combination_FK_1`
+        FOREIGN KEY (`order_product_id`)
+        REFERENCES `order_product` (`id`)
+        ON UPDATE RESTRICT
+        ON DELETE CASCADE,
+    CONSTRAINT `legacy_order_product_attribute_combination_FK_2`
         FOREIGN KEY (`attribute_av_id`)
         REFERENCES `attribute_av` (`id`)
         ON UPDATE RESTRICT

@@ -144,7 +144,7 @@ class LegacyProductAttributeValuePriceTableMap extends TableMap
         $this->addForeignPrimaryKey('PRODUCT_ID', 'ProductId', 'INTEGER' , 'product', 'ID', true, null, null);
         $this->addForeignPrimaryKey('ATTRIBUTE_AV_ID', 'AttributeAvId', 'INTEGER' , 'attribute_av', 'ID', true, null, null);
         $this->addForeignPrimaryKey('CURRENCY_ID', 'CurrencyId', 'INTEGER' , 'currency', 'ID', true, null, null);
-        $this->addColumn('DELTA', 'Delta', 'FLOAT', false, null, 0);
+        $this->addColumn('DELTA', 'Delta', 'DECIMAL', false, 16, 0);
     } // initialize()
 
     /**

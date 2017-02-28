@@ -45,15 +45,14 @@ class LegacyProductAttributesValuesController extends BaseAdminController
     protected function doUpdate(array $formData)
     {
         foreach ($formData['legacy_product_attribute_value_price_delta'] as $attributeAvId => $priceDelta) {
-            if ($priceDelta == 0) {
-                continue;
-            }
-
             $this->createOrUpdateLegacyProductAttributeValue(
                 $formData['product_id'],
                 $attributeAvId,
                 $formData['currency_id'],
-                $priceDelta
+                isset($formData['legacy_product_attribute_value_visible'][$attributeAvId]) ?: false,
+                $priceDelta,
+                $formData['legacy_product_attribute_value_weight_delta'][$attributeAvId],
+                $formData['legacy_product_attribute_value_stock'][$attributeAvId]
             );
         }
     }
@@ -72,7 +71,10 @@ class LegacyProductAttributesValuesController extends BaseAdminController
         $productId,
         $attributeAvId,
         $currencyId,
-        $priceDelta = null
+        $active = true,
+        $priceDelta = null,
+        $weightDelta = null,
+        $stock = null
     ) {
         if ($priceDelta === null) {
             return;
@@ -88,6 +90,12 @@ class LegacyProductAttributesValuesController extends BaseAdminController
                 ->setProductId($productId)
                 ->setAttributeAvId($attributeAvId);
         }
+    
+        $legacyProductAttributeValue
+            ->setVisible($active)
+            ->setWeightDelta($weightDelta)
+            ->setStock($stock)
+            ;
 
         $legacyProductAttributeValuePriceDelta = LegacyProductAttributeValuePriceQuery::create()
             ->findPk([

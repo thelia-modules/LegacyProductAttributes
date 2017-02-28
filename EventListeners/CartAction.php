@@ -35,6 +35,7 @@ class CartAction extends Cart
         return [
             // must run before the Thelia cart action
             TheliaEvents::CART_ADDITEM => ['addItem', 192],
+            TheliaEvents::CART_FINDITEM => ['findCartItem', 192],
         ];
     }
 
@@ -43,12 +44,12 @@ class CartAction extends Cart
      *
      * @param CartEvent $event
      */
-    public function addItem(CartEvent $event)
+    public function addItem(CartEvent $event, $eventName, EventDispatcherInterface $dispatcher)
     {
         $this->getLegacyProductAttributes($event);
 
         // call the parent method, but using our redefined sub-methods
-        parent::addItem($event);
+        parent::addItem($event, $eventName, $dispatcher);
 
         // prevent the parent event from adding the item
         $event->setNewness(false);
@@ -77,44 +78,48 @@ class CartAction extends Cart
             }
         }
     }
-
+    
     /**
-     * @inheritdoc
+     * Find a specific record in CartItem table using the current CartEvent
      *
-     * Find a possible existing cart item by also filtering on our cart item attribute combinations.
+     * @param CartEvent $event the cart event
      */
-    protected function findItem($cartId, $productId, $productSaleElementsId)
+    public function findCartItem(CartEvent $event)
     {
-        // no legacy attributes, let the parent handle it
-        if (empty($this->legacyProductAttributes)) {
-            return parent::findItem($cartId, $productId, $productSaleElementsId);
-        }
-
-        $query = CartItemQuery::create();
-
-        $query
-            ->filterByCartId($cartId)
-            ->filterByProductId($productId)
-            ->filterByProductSaleElementsId($productSaleElementsId);
-
-        /** @var CartItem $cartItem */
-        foreach ($query->find() as $cartItem) {
-            $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()
-                ->findByCartItemId($cartItem->getId());
-
-            $cartItemLegacyProductAttributes = [];
-            /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
-            foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
-                $cartItemLegacyProductAttributes[$legacyCartItemAttributeCombination->getAttributeId()]
-                    = $legacyCartItemAttributeCombination->getAttributeAvId();
+        // Do not try to find a cartItem if one exists in the event,
+        // as previous event handlers may have put it in th event.
+        if (null === $event->getCartItem()) {
+            // Do something if legacy attributes are defined
+            if (!empty($this->legacyProductAttributes)) {
+                $query = CartItemQuery::create();
+        
+                $query
+                    ->filterByCartId($event->getCart()->getId())
+                    ->filterByProductId($event->getProduct())
+                    ->filterByProductSaleElementsId($event->getProductSaleElementsId());
+        
+                /** @var CartItem $cartItem */
+                foreach ($query->find() as $cartItem) {
+                    $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()
+                        ->findByCartItemId($cartItem->getId());
+            
+                    $cartItemLegacyProductAttributes = [];
+                    /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
+                    foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
+                        $cartItemLegacyProductAttributes[$legacyCartItemAttributeCombination->getAttributeId()]
+                            = $legacyCartItemAttributeCombination->getAttributeAvId();
+                    }
+            
+                    if ($cartItemLegacyProductAttributes == $this->legacyProductAttributes) {
+                        $event->setCartItem($cartItem);
+                        break;
+                    }
+                }
+                
+                // Prevent the Cart Action to find something else in the cart
+                $event->stopPropagation();
             }
-
-            if ($cartItemLegacyProductAttributes == $this->legacyProductAttributes) {
-                return $cartItem;
-            }
         }
-
-        return null;
     }
 
     /**
@@ -138,6 +143,7 @@ class CartAction extends Cart
             ->setLegacyProductAttributes($this->legacyProductAttributes);
 
         $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
+        
         if (null !== $productGetPricesEvent->getPrices()) {
             $productPrices = $productGetPricesEvent->getPrices();
         }

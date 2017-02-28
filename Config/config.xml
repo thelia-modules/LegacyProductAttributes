@@ -7,9 +7,6 @@
     <loops>
         <loop name="legacy_cart_item_attribute_combination"
               class="LegacyProductAttributes\Loop\LegacyCartItemAttributeCombinationLoop"/>
-
-        <loop name="product"
-              class="LegacyProductAttributes\Loop\ProductLoop"/>
     </loops>
 
     <forms>
@@ -18,11 +15,11 @@
     </forms>
 
     <hooks>
-        <hook id="legacy_product_attributes.hook.back" class="LegacyProductAttributes\Hook\BackHook" scope="request">
+        <hook id="legacy_product_attributes.hook.back" class="LegacyProductAttributes\Hook\BackHook">
             <tag name="hook.event_listener" type="backoffice" event="product.tab"/>
             <tag name="hook.event_listener" type="backoffice" event="product.edit-js"/>
         </hook>
-        <hook id="legacy_product_attributes.hook.front" class="LegacyProductAttributes\Hook\FrontHook" scope="request">
+        <hook id="legacy_product_attributes.hook.front" class="LegacyProductAttributes\Hook\FrontHook">
             <tag name="hook.event_listener" type="frontoffice" event="category.javascript-initialization"/>
             <tag name="hook.event_listener" type="frontoffice" event="product.javascript-initialization"/>
             <tag name="hook.event_listener" type="frontoffice" event="singleproduct.bottom"/>
@@ -38,25 +35,28 @@
         </service>
 
         <service id="legacy_product_attributes.form_extension.cart_add"
-                 class="LegacyProductAttributes\Form\CartAddFormExtension"
-                 scope="request">
+                 class="LegacyProductAttributes\Form\CartAddFormExtension">
             <tag name="kernel.event_subscriber"/>
-            <argument type="service" id="request"/>
+            <argument type="service" id="request_stack" />
+            <argument type="service" id="thelia.translator" />
         </service>
 
         <service id="legacy_product_attributes.listener.cart"
                  parent="thelia.action.cart"
-                 class="LegacyProductAttributes\EventListeners\CartAction"
-                 scope="request">
+                 class="LegacyProductAttributes\EventListeners\CartAction">
             <tag name="kernel.event_subscriber"/>
         </service>
 
         <service id="legacy_product_attributes.listener.order"
-                 class="LegacyProductAttributes\EventListeners\OrderAction"
-                 scope="request">
+                 class="LegacyProductAttributes\EventListeners\OrderAction">
             <tag name="kernel.event_subscriber"/>
-            <argument type="service" id="request"/>
+            <argument type="service" id="request_stack" />
+        </service>
+
+        <service id="legacy_product_attributes.product_loop_extent"
+                 class="LegacyProductAttributes\EventListeners\ProductLoopExtent">
+            <argument type="service" id="event_dispatcher"/>
+            <tag name="kernel.event_subscriber"/>
         </service>
     </services>
-
 </config>

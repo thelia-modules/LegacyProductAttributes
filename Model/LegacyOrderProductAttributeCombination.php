@@ -1,0 +1,10 @@
+<?php
+
+namespace LegacyProductAttributes\Model;
+
+use LegacyProductAttributes\Model\Base\LegacyOrderProductAttributeCombination as BaseLegacyOrderProductAttributeCombination;
+
+class LegacyOrderProductAttributeCombination extends BaseLegacyOrderProductAttributeCombination
+{
+
+}

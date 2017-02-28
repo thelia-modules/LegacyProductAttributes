@@ -5,7 +5,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS `legacy_product_attribute_value`;
 DROP TABLE IF EXISTS `legacy_product_attribute_value_price`;
+DROP TABLE IF EXISTS `legacy_product_attribute_delta`;
 DROP TABLE IF EXISTS `legacy_cart_item_attribute_combination`;
+DROP TABLE IF EXISTS `legacy_order_product_attribute_combination`;
 
 # This restores the fkey checks, after having unset them earlier
 SET FOREIGN_KEY_CHECKS = 1;
