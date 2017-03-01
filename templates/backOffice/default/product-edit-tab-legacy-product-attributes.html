@@ -71,7 +71,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-condensed table-striped">
                                         <tr>
-                                            <th class="text-center">{intl l="Active"}</th>
+                                            <th class="text-center"><a href="#" data-toggle-attribute-av="{$ID}" title="{intl l="Click to toggle active state"}">{intl l="Active"}</a></th>
                                             <th>{intl l="Attribute value"}</th>
                                             <th>{intl l="Available stock"}</th>
                                             <th>
@@ -92,6 +92,7 @@
                                                     value_key=$ID
                                                 }
                                                     <input type="checkbox"
+                                                           data-attribute-id="{$ATTRIBUTE_ID}"
                                                            id="legacy-attribute-{$ID}-visible"
                                                            name="{$name}"
                                                            value="{$value}"
