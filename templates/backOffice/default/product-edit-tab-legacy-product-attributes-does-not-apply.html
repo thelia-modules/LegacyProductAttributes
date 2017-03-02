@@ -1,6 +1,31 @@
 <div class="alert alert-info">
-    {intl
+    <p>{intl
     l='To use the alternative attributes configuration method on this product, please delete all its attributes combinations.'
     d='legacyproductattributes.bo.default'
-    }
+        }</p>
+    <p>
+        {intl
+            l='<a href="#confirm-attributes-delete" data-toggle="modal">Click here</a> to delete all attributes combinations for this product and start to use alternative attribute management.'
+            d='legacyproductattributes.bo.default'
+        }
+    </p>
+</div>
+
+<div class="modal fade" id="confirm-attributes-delete" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h3>{intl l="Please confirm" d='legacyproductattributes.bo.default'}</h3>
+            </div>
+
+            <div class="modal-body">
+                {intl l="Are you sure you want to delete all attribute combinations for this product ? This can't be undone." d='legacyproductattributes.bo.default'}
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" aria-hidden="true"><span class="glyphicon glyphicon-remove"></span> {intl l="No"}</button>
+                <a href="{url path="/admin/module/LegacyProductAttributes/product/clear-combinations/$product_id" current_tab='legacy-product-attributes'}" class="btn btn-danger"><span class="glyphicon glyphicon-check"></span> {intl l="Yes"}</a>
+            </div>
+    </div>
 </div>

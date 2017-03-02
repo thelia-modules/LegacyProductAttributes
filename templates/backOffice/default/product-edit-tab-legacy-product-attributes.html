@@ -34,7 +34,7 @@
                         <div class="col-md-12">
                             <div class="button-group">
                                 {loop name="currency_list" type="currency"}
-                                    <a class="btn btn-sm {if $ID == $edit_currency_id}btn-primary{else}btn-default{/if}" href="{url noamp=1 path={$page_url|default:$current_url nofilter} edit_currency_id=$ID}" title="{intl l='Edit prices in %curr' curr={$NAME}}">
+                                    <a class="btn btn-sm {if $ID == $edit_currency_id}btn-primary{else}btn-default{/if}" href="{url noamp=1 path={$page_url|default:$current_url nofilter} edit_currency_id=$ID}" title="{intl l='Edit prices in %curr' curr={$NAME} d='legacyproductattributes.bo.default'}">
                                         {$SYMBOL}
                                     </a>
                                 {/loop}
@@ -44,9 +44,9 @@
                 </div>
 
                 <div class="col-md-6 inner-actions text-right">
-                    <button type="submit" name="save_mode" value="stay" class="form-submit-button btn btn-sm btn-default btn-success" title="{intl l='Save'}">{intl l='Save'} <span class="glyphicon glyphicon-ok"></span></button>
-                    <button type="submit" name="save_mode" value="close" class="form-submit-button btn btn-sm btn-default btn-info" title="{intl l='Save and close'}">{intl l='Save and close'} <span class="glyphicon glyphicon-remove"></span></button>
-                    <a href="{$close_url nofilter}" class="page-close-button btn btn-sm btn-default">{intl l='Close'} <span class="glyphicon glyphicon-remove"></span></a>
+                    <button type="submit" name="save_mode" value="stay" class="form-submit-button btn btn-sm btn-default btn-success" title="{intl l='Save' d='legacyproductattributes.bo.default'}">{intl l='Save' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-ok"></span></button>
+                    <button type="submit" name="save_mode" value="close" class="form-submit-button btn btn-sm btn-default btn-info" title="{intl l='Save and close' d='legacyproductattributes.bo.default'}">{intl l='Save and close' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-remove"></span></button>
+                    <a href="{$close_url nofilter}" class="page-close-button btn btn-sm btn-default">{intl l='Close' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-remove"></span></a>
                 </div>
             </div>
 
@@ -65,20 +65,20 @@
                 }
                     <div class="col-md-12">
                         <div class="panel panel-primary">
-                            <div class="panel-heading">{intl l="Attribute : %attr" attr=$TITLE}</div>
+                            <div class="panel-heading">{intl l="Attribute : %attr" attr=$TITLE d='legacyproductattributes.bo.default'}</div>
 
                             <div class="panel-body">
                                 <div class="table-responsive">
                                     <table class="table table-condensed table-striped">
                                         <tr>
-                                            <th class="text-center"><a href="#" data-toggle-attribute-av="{$ID}" title="{intl l="Click to toggle active state"}">{intl l="Active"}</a></th>
-                                            <th>{intl l="Attribute value"}</th>
-                                            <th>{intl l="Available stock"}</th>
+                                            <th class="text-center"><a href="#" data-toggle-attribute-av="{$ID}" title="{intl l="Click to toggle active state" d='legacyproductattributes.bo.default'}">{intl l="Active" d='legacyproductattributes.bo.default'}</a></th>
+                                            <th>{intl l="Attribute value" d='legacyproductattributes.bo.default'}</th>
+                                            <th>{intl l="Available stock" d='legacyproductattributes.bo.default'}</th>
                                             <th>
-                                                <span class="legacy-attributes-price with-tax">{intl l="Price delta with tax"}</span>
-                                                <span class="legacy-attributes-price without-tax">{intl l="Price delta without tax"}</span>
+                                                <span class="legacy-attributes-price with-tax">{intl l="Price delta with tax" d='legacyproductattributes.bo.default'}</span>
+                                                <span class="legacy-attributes-price without-tax">{intl l="Price delta without tax" d='legacyproductattributes.bo.default'}</span>
                                             </th>
-                                            <th>{intl l="Weight delta"}</th>
+                                            <th>{intl l="Weight delta" d='legacyproductattributes.bo.default'}</th>
                                         </tr>
                                     {loop
                                         name='legacy_product_attributes.attributes.availability'
@@ -164,7 +164,7 @@
                                                                value="{$value}"
                                                                type="text"
                                                                class="form-control">
-                                                        <span class="input-group-addon">{intl l="kg"}</span>
+                                                        <span class="input-group-addon">{intl l="kg" d='legacyproductattributes.bo.default'}</span>
                                                     </div>
                                                 {/form_field}
                                             </td>

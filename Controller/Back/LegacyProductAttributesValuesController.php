@@ -8,15 +8,64 @@ use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery;
 use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
 use Propel\Runtime\Exception\PropelException;
 use Propel\Runtime\Propel;
+use Thelia\Action\Customer;
 use Thelia\Controller\Admin\BaseAdminController;
+use Thelia\Core\Event\ProductSaleElement\ProductSaleElementDeleteEvent;
+use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\HttpFoundation\Response;
 use Thelia\Form\Exception\FormValidationException;
+use Thelia\Model\AttributeCombinationQuery;
+use Thelia\Model\Currency;
+use Thelia\Model\Map\ProductSaleElementsTableMap;
+use Thelia\Model\ProductSaleElementsQuery;
+use Thelia\Tools\URL;
 
 /**
  * Controller for legacy product attribute values administration.
  */
 class LegacyProductAttributesValuesController extends BaseAdminController
 {
+    public function clearProductCombinationsAction($productId)
+    {
+        // Select all PSE except the default one
+        $pseToDelete = ProductSaleElementsQuery::create()
+            ->filterByProductId($productId)
+            ->filterByIsDefault(false)
+            ->select([ ProductSaleElementsTableMap::ID ])
+            ->find()
+        ;
+        
+        // Delete them one by one
+        foreach ($pseToDelete->getData() as $pseId) {
+            $this->getDispatcher()->dispatch(
+                TheliaEvents::PRODUCT_DELETE_PRODUCT_SALE_ELEMENT,
+                new ProductSaleElementDeleteEvent($pseId, Currency::getDefaultCurrency()->getId())
+            );
+        }
+        
+        // Get the default PSE
+        $defaultPse = ProductSaleElementsQuery::create()
+            ->filterByProductId($productId)
+            ->findOneByIsDefault(true)
+        ;
+        
+        // Delete the related combination, so that the product has no longer any attribute combinations
+        AttributeCombinationQuery::create()
+            ->filterByProductSaleElements($defaultPse)
+            ->delete();
+        
+        // We're ready !
+        return $this->generateRedirect(
+            URL::getInstance()->absoluteUrl(
+                "/admin/products/update",
+                [
+                    'product_id' => $productId,
+                    'current_tab' => 'legacy-product-attributes'
+                ]
+            )
+        );
+    }
+    
     /**
      * @return \Symfony\Component\HttpFoundation\Response
      */

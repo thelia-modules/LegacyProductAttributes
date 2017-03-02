@@ -1,12 +1,25 @@
 <?php
 
-return [
-    'Attributes configuration' => 'Attributes configuration',
-    'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.'
-    => 'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.',
-    'To use attributes on this product, please select a product template.'
-    => 'To use attributes on this product, please select a product template.',
+return array(
+    '<a href="#confirm-attributes-delete" data-toggle="modal">Click here</a> to delete all attributes combinations for this product and start to use alternative attribute management.' => '<a href="#confirm-attributes-delete" data-toggle="modal">Click here</a> to delete all attributes combinations for this product and start to use alternative attribute management.',
+    'Active' => 'Active',
+    'Are you sure you want to delete all attribute combinations for this product ? This can\'t be undone.' => 'Are you sure you want to delete all attribute combinations for this product ? This can\'t be undone.',
+    'Attribute : %attr' => 'Attribute : %attr',
+    'Attribute value' => 'Attribute value',
+    'Available stock' => 'Available stock',
+    'Click to toggle active state' => 'Click to toggle active state',
+    'Close' => 'Close',
+    'Edit prices in %curr' => 'Edit prices in %curr',
     'Edit prices with taxes' => 'Edit prices with taxes',
-    'Price difference excluding taxes' => 'Price difference excluding taxes',
-    'Price difference including taxes' => 'Price difference including taxes',
-];
+    'No' => 'No',
+    'Please confirm' => 'Please confirm',
+    'Price delta with tax' => 'Price delta with tax',
+    'Price delta without tax' => 'Price delta without tax',
+    'Save' => 'Save',
+    'Save and close' => 'Save and close',
+    'To use attributes on this product, please select a product template.' => 'To use attributes on this product, please select a product template.',
+    'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.' => 'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.',
+    'Weight delta' => 'Weight delta',
+    'Yes' => 'Yes',
+    'kg' => 'kg',
+);

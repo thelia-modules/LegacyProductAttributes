@@ -10,16 +10,15 @@
         <default key="_controller">LegacyProductAttributes:Back\LegacyProductAttributesValues:update</default>
     </route>
 
+    <route id="legacy_product_attributes.product.clear_combinations"
+           path="/admin/module/LegacyProductAttributes/product/clear-combinations/{productId}">
+        <default key="_controller">LegacyProductAttributes:Back\LegacyProductAttributesValues:clearProductCombinations</default>
+        <requirement key="productId">\d+</requirement>
+    </route>
+
     <route id="legacy_product_attributes.product.get_prices"
            path="/admin/module/LegacyProductAttributes/product/get_prices"
            methods="post">
         <default key="_controller">LegacyProductAttributes:Front\Product:getPrices</default>
     </route>
-
-    <!-- (ugly) fix for Thelia 2.1 -->
-    <!-- FIXME: this should be removed ASAP -->
-    <route id="legacy_product_attributes.cart.add.process" path="/cart/add">
-        <default key="_controller">LegacyProductAttributes\Controller\Front\CartController::addItem</default>
-    </route>
-
 </routes>

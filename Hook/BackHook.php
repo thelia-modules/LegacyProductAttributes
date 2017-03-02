@@ -32,7 +32,10 @@ class BackHook extends BaseHook
         );
 
         if (!$productCheckEvent->getResult()) {
-            $content = $this->render('product-edit-tab-legacy-product-attributes-does-not-apply.html');
+            $content = $this->render(
+                'product-edit-tab-legacy-product-attributes-does-not-apply.html',
+                [ 'product_id' => $product->getId() ]
+            );
         } elseif ($product->getTemplate() === null) {
             $content = $this->render('product-edit-tab-legacy-product-attributes-no-template.html');
         } else {
@@ -44,7 +47,7 @@ class BackHook extends BaseHook
             'title' => Translator::getInstance()->trans(
                 'Attributes configuration',
                 [],
-                LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                LegacyProductAttributes::MESSAGE_DOMAIN
             ),
             'content' => $content,
         ]);
