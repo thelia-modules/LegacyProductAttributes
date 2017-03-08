@@ -17,7 +17,7 @@
     </route>
 
     <route id="legacy_product_attributes.product.get_prices"
-           path="/admin/module/LegacyProductAttributes/product/get_prices"
+           path="/module/LegacyProductAttributes/product/get_prices"
            methods="post">
         <default key="_controller">LegacyProductAttributes:Front\Product:getPrices</default>
     </route>

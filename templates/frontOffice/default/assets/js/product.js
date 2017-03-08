@@ -46,7 +46,7 @@
         $
             .ajax({
                 type: 'POST',
-                url: '{url path="/admin/module/LegacyProductAttributes/product/get_prices"}',
+                url: '{url path="/module/LegacyProductAttributes/product/get_prices"}',
                 data: $formProductDetails.serialize()
             })
             .done(function (data) {
