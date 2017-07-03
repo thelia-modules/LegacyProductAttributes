@@ -29,19 +29,19 @@ class ProductController extends BaseFrontController
     public function getPricesAction()
     {
         $baseForm = $this->createForm('thelia.cart.add');
-
+    
         // make the quantity field a dummy field so that we can ignore it
         // (we want to be able to update prices on out-of-stock products),
         // while still validating the rest of the form
         $baseForm->getForm()->remove('quantity');
-        $baseForm->getForm()->add('quantity', 'number', ['mapped' => false]);
+        $baseForm->getForm()->add('quantity', 'number'); //, ['mapped' => false]);
 
         try {
             $form = $this->validateForm($baseForm, 'POST');
-
             $product = ProductQuery::create()->findPk($form->get('product')->getData());
+            $quantity = $form->get('quantity')->getData();
 
-            $productGetPricesEvent = (new ProductGetPricesEvent($product->getId()))
+            $productGetPricesEvent = (new ProductGetPricesEvent($product->getId(), $quantity))
                 ->setCurrencyId($this->getSession()->getCurrency()->getId())
                 ->setLegacyProductAttributes($this->getLegacyProductAttributesInForm($form));
 
@@ -70,6 +70,13 @@ class ProductController extends BaseFrontController
                     null,
                     $this->getSession()->getCurrency()->getSymbol()
                 ),
+                'untaxed_price' => $moneyFormat->format(
+                    $prices->getPrice(),
+                    null,
+                    null,
+                    null,
+                    $this->getSession()->getCurrency()->getSymbol()
+                )
             ];
 
             if ($product->getDefaultSaleElements()->getPromo()) {
@@ -80,8 +87,17 @@ class ProductController extends BaseFrontController
                     null,
                     $this->getSession()->getCurrency()->getSymbol()
                 );
+                
+                $response['untaxed_promo_price'] = $moneyFormat->format(
+                    $prices->getPromoPrice(),
+                    null,
+                    null,
+                    null,
+                    $this->getSession()->getCurrency()->getSymbol()
+                );
+                
             }
-
+            
             return new JsonResponse($response);
         } catch (FormValidationException $e) {
             return JsonResponse::createError($e->getMessage(), 400);

@@ -24,10 +24,12 @@ use Thelia\Model\CartItem;
  *
  *
  *
+ * @method     ChildLegacyCartItemAttributeCombinationQuery orderById($order = Criteria::ASC) Order by the id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery orderByCartItemId($order = Criteria::ASC) Order by the cart_item_id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery orderByAttributeId($order = Criteria::ASC) Order by the attribute_id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery orderByAttributeAvId($order = Criteria::ASC) Order by the attribute_av_id column
  *
+ * @method     ChildLegacyCartItemAttributeCombinationQuery groupById() Group by the id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery groupByCartItemId() Group by the cart_item_id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery groupByAttributeId() Group by the attribute_id column
  * @method     ChildLegacyCartItemAttributeCombinationQuery groupByAttributeAvId() Group by the attribute_av_id column
@@ -51,10 +53,12 @@ use Thelia\Model\CartItem;
  * @method     ChildLegacyCartItemAttributeCombination findOne(ConnectionInterface $con = null) Return the first ChildLegacyCartItemAttributeCombination matching the query
  * @method     ChildLegacyCartItemAttributeCombination findOneOrCreate(ConnectionInterface $con = null) Return the first ChildLegacyCartItemAttributeCombination matching the query, or a new ChildLegacyCartItemAttributeCombination object populated from the query conditions when no match is found
  *
+ * @method     ChildLegacyCartItemAttributeCombination findOneById(int $id) Return the first ChildLegacyCartItemAttributeCombination filtered by the id column
  * @method     ChildLegacyCartItemAttributeCombination findOneByCartItemId(int $cart_item_id) Return the first ChildLegacyCartItemAttributeCombination filtered by the cart_item_id column
  * @method     ChildLegacyCartItemAttributeCombination findOneByAttributeId(int $attribute_id) Return the first ChildLegacyCartItemAttributeCombination filtered by the attribute_id column
  * @method     ChildLegacyCartItemAttributeCombination findOneByAttributeAvId(int $attribute_av_id) Return the first ChildLegacyCartItemAttributeCombination filtered by the attribute_av_id column
  *
+ * @method     array findById(int $id) Return ChildLegacyCartItemAttributeCombination objects filtered by the id column
  * @method     array findByCartItemId(int $cart_item_id) Return ChildLegacyCartItemAttributeCombination objects filtered by the cart_item_id column
  * @method     array findByAttributeId(int $attribute_id) Return ChildLegacyCartItemAttributeCombination objects filtered by the attribute_id column
  * @method     array findByAttributeAvId(int $attribute_av_id) Return ChildLegacyCartItemAttributeCombination objects filtered by the attribute_av_id column
@@ -105,10 +109,10 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
      * Go fast if the query is untouched.
      *
      * <code>
-     * $obj = $c->findPk(array(12, 34), $con);
+     * $obj = $c->findPk(array(12, 34, 56), $con);
      * </code>
      *
-     * @param array[$cart_item_id, $attribute_id] $key Primary key to use for the query
+     * @param array[$id, $cart_item_id, $attribute_id] $key Primary key to use for the query
      * @param ConnectionInterface $con an optional connection object
      *
      * @return ChildLegacyCartItemAttributeCombination|array|mixed the result, formatted by the current formatter
@@ -118,7 +122,7 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
         if ($key === null) {
             return null;
         }
-        if ((null !== ($obj = LegacyCartItemAttributeCombinationTableMap::getInstanceFromPool(serialize(array((string) $key[0], (string) $key[1]))))) && !$this->formatter) {
+        if ((null !== ($obj = LegacyCartItemAttributeCombinationTableMap::getInstanceFromPool(serialize(array((string) $key[0], (string) $key[1], (string) $key[2]))))) && !$this->formatter) {
             // the object is already in the instance pool
             return $obj;
         }
@@ -146,11 +150,12 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT CART_ITEM_ID, ATTRIBUTE_ID, ATTRIBUTE_AV_ID FROM legacy_cart_item_attribute_combination WHERE CART_ITEM_ID = :p0 AND ATTRIBUTE_ID = :p1';
+        $sql = 'SELECT ID, CART_ITEM_ID, ATTRIBUTE_ID, ATTRIBUTE_AV_ID FROM legacy_cart_item_attribute_combination WHERE ID = :p0 AND CART_ITEM_ID = :p1 AND ATTRIBUTE_ID = :p2';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
             $stmt->bindValue(':p1', $key[1], PDO::PARAM_INT);
+            $stmt->bindValue(':p2', $key[2], PDO::PARAM_INT);
             $stmt->execute();
         } catch (Exception $e) {
             Propel::log($e->getMessage(), Propel::LOG_ERR);
@@ -160,7 +165,7 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
         if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
             $obj = new ChildLegacyCartItemAttributeCombination();
             $obj->hydrate($row);
-            LegacyCartItemAttributeCombinationTableMap::addInstanceToPool($obj, serialize(array((string) $key[0], (string) $key[1])));
+            LegacyCartItemAttributeCombinationTableMap::addInstanceToPool($obj, serialize(array((string) $key[0], (string) $key[1], (string) $key[2])));
         }
         $stmt->closeCursor();
 
@@ -219,8 +224,9 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
      */
     public function filterByPrimaryKey($key)
     {
-        $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $key[0], Criteria::EQUAL);
-        $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $key[1], Criteria::EQUAL);
+        $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ID, $key[0], Criteria::EQUAL);
+        $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $key[1], Criteria::EQUAL);
+        $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $key[2], Criteria::EQUAL);
 
         return $this;
     }
@@ -238,13 +244,56 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
             return $this->add(null, '1<>1', Criteria::CUSTOM);
         }
         foreach ($keys as $key) {
-            $cton0 = $this->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $key[0], Criteria::EQUAL);
-            $cton1 = $this->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $key[1], Criteria::EQUAL);
+            $cton0 = $this->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ID, $key[0], Criteria::EQUAL);
+            $cton1 = $this->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $key[1], Criteria::EQUAL);
             $cton0->addAnd($cton1);
+            $cton2 = $this->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $key[2], Criteria::EQUAL);
+            $cton0->addAnd($cton2);
             $this->addOr($cton0);
         }
 
         return $this;
+    }
+
+    /**
+     * Filter the query on the id column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterById(1234); // WHERE id = 1234
+     * $query->filterById(array(12, 34)); // WHERE id IN (12, 34)
+     * $query->filterById(array('min' => 12)); // WHERE id > 12
+     * </code>
+     *
+     * @param     mixed $id The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildLegacyCartItemAttributeCombinationQuery The current query, for fluid interface
+     */
+    public function filterById($id = null, $comparison = null)
+    {
+        if (is_array($id)) {
+            $useMinMax = false;
+            if (isset($id['min'])) {
+                $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ID, $id['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($id['max'])) {
+                $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ID, $id['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(LegacyCartItemAttributeCombinationTableMap::ID, $id, $comparison);
     }
 
     /**
@@ -611,9 +660,10 @@ abstract class LegacyCartItemAttributeCombinationQuery extends ModelCriteria
     public function prune($legacyCartItemAttributeCombination = null)
     {
         if ($legacyCartItemAttributeCombination) {
-            $this->addCond('pruneCond0', $this->getAliasedColName(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID), $legacyCartItemAttributeCombination->getCartItemId(), Criteria::NOT_EQUAL);
-            $this->addCond('pruneCond1', $this->getAliasedColName(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID), $legacyCartItemAttributeCombination->getAttributeId(), Criteria::NOT_EQUAL);
-            $this->combine(array('pruneCond0', 'pruneCond1'), Criteria::LOGICAL_OR);
+            $this->addCond('pruneCond0', $this->getAliasedColName(LegacyCartItemAttributeCombinationTableMap::ID), $legacyCartItemAttributeCombination->getId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond1', $this->getAliasedColName(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID), $legacyCartItemAttributeCombination->getCartItemId(), Criteria::NOT_EQUAL);
+            $this->addCond('pruneCond2', $this->getAliasedColName(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID), $legacyCartItemAttributeCombination->getAttributeId(), Criteria::NOT_EQUAL);
+            $this->combine(array('pruneCond0', 'pruneCond1', 'pruneCond2'), Criteria::LOGICAL_OR);
         }
 
         return $this;

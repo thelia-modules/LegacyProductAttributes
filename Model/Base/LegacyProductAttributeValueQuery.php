@@ -25,9 +25,15 @@ use Thelia\Model\Product;
  *
  * @method     ChildLegacyProductAttributeValueQuery orderByProductId($order = Criteria::ASC) Order by the product_id column
  * @method     ChildLegacyProductAttributeValueQuery orderByAttributeAvId($order = Criteria::ASC) Order by the attribute_av_id column
+ * @method     ChildLegacyProductAttributeValueQuery orderByWeightDelta($order = Criteria::ASC) Order by the weight_delta column
+ * @method     ChildLegacyProductAttributeValueQuery orderByStock($order = Criteria::ASC) Order by the stock column
+ * @method     ChildLegacyProductAttributeValueQuery orderByVisible($order = Criteria::ASC) Order by the visible column
  *
  * @method     ChildLegacyProductAttributeValueQuery groupByProductId() Group by the product_id column
  * @method     ChildLegacyProductAttributeValueQuery groupByAttributeAvId() Group by the attribute_av_id column
+ * @method     ChildLegacyProductAttributeValueQuery groupByWeightDelta() Group by the weight_delta column
+ * @method     ChildLegacyProductAttributeValueQuery groupByStock() Group by the stock column
+ * @method     ChildLegacyProductAttributeValueQuery groupByVisible() Group by the visible column
  *
  * @method     ChildLegacyProductAttributeValueQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
  * @method     ChildLegacyProductAttributeValueQuery rightJoin($relation) Adds a RIGHT JOIN clause to the query
@@ -46,9 +52,15 @@ use Thelia\Model\Product;
  *
  * @method     ChildLegacyProductAttributeValue findOneByProductId(int $product_id) Return the first ChildLegacyProductAttributeValue filtered by the product_id column
  * @method     ChildLegacyProductAttributeValue findOneByAttributeAvId(int $attribute_av_id) Return the first ChildLegacyProductAttributeValue filtered by the attribute_av_id column
+ * @method     ChildLegacyProductAttributeValue findOneByWeightDelta(double $weight_delta) Return the first ChildLegacyProductAttributeValue filtered by the weight_delta column
+ * @method     ChildLegacyProductAttributeValue findOneByStock(int $stock) Return the first ChildLegacyProductAttributeValue filtered by the stock column
+ * @method     ChildLegacyProductAttributeValue findOneByVisible(boolean $visible) Return the first ChildLegacyProductAttributeValue filtered by the visible column
  *
  * @method     array findByProductId(int $product_id) Return ChildLegacyProductAttributeValue objects filtered by the product_id column
  * @method     array findByAttributeAvId(int $attribute_av_id) Return ChildLegacyProductAttributeValue objects filtered by the attribute_av_id column
+ * @method     array findByWeightDelta(double $weight_delta) Return ChildLegacyProductAttributeValue objects filtered by the weight_delta column
+ * @method     array findByStock(int $stock) Return ChildLegacyProductAttributeValue objects filtered by the stock column
+ * @method     array findByVisible(boolean $visible) Return ChildLegacyProductAttributeValue objects filtered by the visible column
  *
  */
 abstract class LegacyProductAttributeValueQuery extends ModelCriteria
@@ -137,7 +149,7 @@ abstract class LegacyProductAttributeValueQuery extends ModelCriteria
      */
     protected function findPkSimple($key, $con)
     {
-        $sql = 'SELECT PRODUCT_ID, ATTRIBUTE_AV_ID FROM legacy_product_attribute_value WHERE PRODUCT_ID = :p0 AND ATTRIBUTE_AV_ID = :p1';
+        $sql = 'SELECT PRODUCT_ID, ATTRIBUTE_AV_ID, WEIGHT_DELTA, STOCK, VISIBLE FROM legacy_product_attribute_value WHERE PRODUCT_ID = :p0 AND ATTRIBUTE_AV_ID = :p1';
         try {
             $stmt = $con->prepare($sql);
             $stmt->bindValue(':p0', $key[0], PDO::PARAM_INT);
@@ -322,6 +334,115 @@ abstract class LegacyProductAttributeValueQuery extends ModelCriteria
         }
 
         return $this->addUsingAlias(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, $attributeAvId, $comparison);
+    }
+
+    /**
+     * Filter the query on the weight_delta column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByWeightDelta(1234); // WHERE weight_delta = 1234
+     * $query->filterByWeightDelta(array(12, 34)); // WHERE weight_delta IN (12, 34)
+     * $query->filterByWeightDelta(array('min' => 12)); // WHERE weight_delta > 12
+     * </code>
+     *
+     * @param     mixed $weightDelta The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildLegacyProductAttributeValueQuery The current query, for fluid interface
+     */
+    public function filterByWeightDelta($weightDelta = null, $comparison = null)
+    {
+        if (is_array($weightDelta)) {
+            $useMinMax = false;
+            if (isset($weightDelta['min'])) {
+                $this->addUsingAlias(LegacyProductAttributeValueTableMap::WEIGHT_DELTA, $weightDelta['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($weightDelta['max'])) {
+                $this->addUsingAlias(LegacyProductAttributeValueTableMap::WEIGHT_DELTA, $weightDelta['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(LegacyProductAttributeValueTableMap::WEIGHT_DELTA, $weightDelta, $comparison);
+    }
+
+    /**
+     * Filter the query on the stock column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByStock(1234); // WHERE stock = 1234
+     * $query->filterByStock(array(12, 34)); // WHERE stock IN (12, 34)
+     * $query->filterByStock(array('min' => 12)); // WHERE stock > 12
+     * </code>
+     *
+     * @param     mixed $stock The value to use as filter.
+     *              Use scalar values for equality.
+     *              Use array values for in_array() equivalent.
+     *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildLegacyProductAttributeValueQuery The current query, for fluid interface
+     */
+    public function filterByStock($stock = null, $comparison = null)
+    {
+        if (is_array($stock)) {
+            $useMinMax = false;
+            if (isset($stock['min'])) {
+                $this->addUsingAlias(LegacyProductAttributeValueTableMap::STOCK, $stock['min'], Criteria::GREATER_EQUAL);
+                $useMinMax = true;
+            }
+            if (isset($stock['max'])) {
+                $this->addUsingAlias(LegacyProductAttributeValueTableMap::STOCK, $stock['max'], Criteria::LESS_EQUAL);
+                $useMinMax = true;
+            }
+            if ($useMinMax) {
+                return $this;
+            }
+            if (null === $comparison) {
+                $comparison = Criteria::IN;
+            }
+        }
+
+        return $this->addUsingAlias(LegacyProductAttributeValueTableMap::STOCK, $stock, $comparison);
+    }
+
+    /**
+     * Filter the query on the visible column
+     *
+     * Example usage:
+     * <code>
+     * $query->filterByVisible(true); // WHERE visible = true
+     * $query->filterByVisible('yes'); // WHERE visible = true
+     * </code>
+     *
+     * @param     boolean|string $visible The value to use as filter.
+     *              Non-boolean arguments are converted using the following rules:
+     *                * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *                * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     *              Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     * @param     string $comparison Operator to use for the column comparison, defaults to Criteria::EQUAL
+     *
+     * @return ChildLegacyProductAttributeValueQuery The current query, for fluid interface
+     */
+    public function filterByVisible($visible = null, $comparison = null)
+    {
+        if (is_string($visible)) {
+            $visible = in_array(strtolower($visible), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+        }
+
+        return $this->addUsingAlias(LegacyProductAttributeValueTableMap::VISIBLE, $visible, $comparison);
     }
 
     /**

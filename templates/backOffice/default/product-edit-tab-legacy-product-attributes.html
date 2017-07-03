@@ -34,7 +34,7 @@
                         <div class="col-md-12">
                             <div class="button-group">
                                 {loop name="currency_list" type="currency"}
-                                    <a class="btn btn-sm {if $ID == $edit_currency_id}btn-primary{else}btn-default{/if}" href="{url noamp=1 path={$page_url|default:$current_url nofilter} edit_currency_id=$ID}" title="{intl l='Edit prices in %curr' curr={$NAME}}">
+                                    <a class="btn btn-sm {if $ID == $edit_currency_id}btn-primary{else}btn-default{/if}" href="{url noamp=1 path={$page_url|default:$current_url nofilter} edit_currency_id=$ID}" title="{intl l='Edit prices in %curr' curr={$NAME} d='legacyproductattributes.bo.default'}">
                                         {$SYMBOL}
                                     </a>
                                 {/loop}
@@ -44,90 +44,135 @@
                 </div>
 
                 <div class="col-md-6 inner-actions text-right">
-                    <button type="submit" name="save_mode" value="stay" class="form-submit-button btn btn-sm btn-default btn-success" title="{intl l='Save'}">{intl l='Save'} <span class="glyphicon glyphicon-ok"></span></button>
-                    <button type="submit" name="save_mode" value="close" class="form-submit-button btn btn-sm btn-default btn-info" title="{intl l='Save and close'}">{intl l='Save and close'} <span class="glyphicon glyphicon-remove"></span></button>
-                    <a href="{$close_url nofilter}" class="page-close-button btn btn-sm btn-default">{intl l='Close'} <span class="glyphicon glyphicon-remove"></span></a>
+                    <button type="submit" name="save_mode" value="stay" class="form-submit-button btn btn-sm btn-default btn-success" title="{intl l='Save' d='legacyproductattributes.bo.default'}">{intl l='Save' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-ok"></span></button>
+                    <button type="submit" name="save_mode" value="close" class="form-submit-button btn btn-sm btn-default btn-info" title="{intl l='Save and close' d='legacyproductattributes.bo.default'}">{intl l='Save and close' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-remove"></span></button>
+                    <a href="{$close_url nofilter}" class="page-close-button btn btn-sm btn-default">{intl l='Close' d='legacyproductattributes.bo.default'} <span class="glyphicon glyphicon-remove"></span></a>
                 </div>
             </div>
 
             <div class="form-group">
                 <label for="use_prices_with_tax">
+                    <input id="use_prices_with_tax" type="checkbox" checked>
                     {intl l='Edit prices with taxes' d='legacyproductattributes.bo.default'}
                 </label>
-                <input id="use_prices_with_tax" type="checkbox" checked>
             </div>
 
             <div class="row">
                 {loop
-                name='legacy_product_attributes.attributes'
-                type='attribute'
-                product=$product_id
+                    name='legacy_product_attributes.attributes'
+                    type='attribute'
+                    product=$product_id
                 }
-                    <div class="col-md-3">
-                        <div class="well well-sm">
-                            <div class="title title-without-tabs">
-                                {$TITLE}
-                            </div>
+                    <div class="col-md-12">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">{intl l="Attribute : %attr" attr=$TITLE d='legacyproductattributes.bo.default'}</div>
 
-                            <table class="table table-striped table-condensed">
-                                <tbody>
-                                {loop
-                                name='legacy_product_attributes.attributes.availability'
-                                type='attribute_availability'
-                                attribute=$ID
-                                }
-                                    <tr>
-                                        <td>
-                                            <div class="title">
-                                                {$TITLE}
-                                            </div>
-                                            <div class="form-group legacy-attributes-price without-tax">
+                            <div class="panel-body">
+                                <div class="table-responsive">
+                                    <table class="table table-condensed table-striped">
+                                        <tr>
+                                            <th class="text-center"><a href="#" data-toggle-attribute-av="{$ID}" title="{intl l="Click to toggle active state" d='legacyproductattributes.bo.default'}">{intl l="Active" d='legacyproductattributes.bo.default'}</a></th>
+                                            <th>{intl l="Attribute value" d='legacyproductattributes.bo.default'}</th>
+                                            <th>{intl l="Available stock" d='legacyproductattributes.bo.default'}</th>
+                                            <th>
+                                                <span class="legacy-attributes-price with-tax">{intl l="Price delta with tax" d='legacyproductattributes.bo.default'}</span>
+                                                <span class="legacy-attributes-price without-tax">{intl l="Price delta without tax" d='legacyproductattributes.bo.default'}</span>
+                                            </th>
+                                            <th>{intl l="Weight delta" d='legacyproductattributes.bo.default'}</th>
+                                        </tr>
+                                    {loop
+                                        name='legacy_product_attributes.attributes.availability'
+                                        type='attribute_availability'
+                                        attribute=$ID
+                                    }
+                                        <tr>
+                                            <td class="text-center">
                                                 {form_field
-                                                form=$form
-                                                field='legacy_product_attribute_value_price_delta'
+                                                    field='legacy_product_attribute_value_visible'
+                                                    value_key=$ID
+                                                }
+                                                    <input type="checkbox"
+                                                           data-attribute-id="{$ATTRIBUTE_ID}"
+                                                           id="legacy-attribute-{$ID}-visible"
+                                                           name="{$name}"
+                                                           value="{$value}"
+                                                           {if $data[$ID]}checked{/if}>
+                                                {/form_field}
+                                            </td>
+                                            
+                                            <td>{$TITLE}</td>
+                                            
+                                            <td>
+                                                {form_field
+                                                field='legacy_product_attribute_value_stock'
                                                 value_key=$ID
                                                 }
-                                                    <label for="legacy-attribute-{$ID}-price-delta">
-                                                        {$label}
-                                                    </label>
+                                                    <input id="legacy-attribute-{$ID}-stock"
+                                                           name="{$name}"
+                                                           value="{$value}"
+                                                           type="text"
+                                                           class="form-control">
+                                                {/form_field}
+                                            </td>
+        
+                                            <td>
+                                                <div class="legacy-attributes-price without-tax">
+                                                    {form_field
+                                                        field='legacy_product_attribute_value_price_delta'
+                                                        value_key=$ID
+                                                    }
+                                                        <div class="input-group">
+                                                            <input id="legacy-attribute-{$ID}-price-delta"
+                                                                   name="{$name}"
+                                                                   value="{$value}"
+                                                                   type="text"
+                                                                   class="price_field automatic_price_field form-control"
+                                                                   data-rel-price="legacy-attribute-{$ID}-price-delta-with-tax"
+                                                                   data-price-type="price-without-tax">
+                                                            <span class="input-group-addon">{$currency_symbol}</span>
+                                                        </div>
+                                                    {/form_field}
+                                                </div>
+                                                    
+                                                <div class="legacy-attributes-price with-tax">
+                                                    {form_field
+                                                        field='legacy_product_attribute_value_price_delta_with_tax'
+                                                        value_key=$ID
+                                                    }
+                                                        <div class="input-group">
+                                                            <input id="legacy-attribute-{$ID}-price-delta-with-tax"
+                                                                   name="{$name}"
+                                                                   value="{$value}"
+                                                                   type="text"
+                                                                   class="price_field automatic_price_field form-control"
+                                                                   data-rel-price="legacy-attribute-{$ID}-price-delta"
+                                                                   data-price-type="price-with-tax">
+                                                            <span class="input-group-addon">{$currency_symbol}</span>
+                                                        </div>
+                                                    {/form_field}
+                                                </div>
+                                            </td>
+                                            
+                                            <td>
+                                                {form_field
+                                                field='legacy_product_attribute_value_weight_delta'
+                                                value_key=$ID
+                                                }
                                                     <div class="input-group">
-                                                        <input id="legacy-attribute-{$ID}-price-delta"
+                                                        <input id="legacy-attribute-{$ID}-weight-delta"
                                                                name="{$name}"
                                                                value="{$value}"
                                                                type="text"
-                                                               class="price_field automatic_price_field form-control"
-                                                               data-rel-price="legacy-attribute-{$ID}-price-delta-with-tax"
-                                                               data-price-type="price-without-tax">
-                                                        <span class="input-group-addon">{$currency_symbol}</span>
+                                                               class="form-control">
+                                                        <span class="input-group-addon">{intl l="kg" d='legacyproductattributes.bo.default'}</span>
                                                     </div>
                                                 {/form_field}
-                                            </div>
-                                            <div class="form-group legacy-attributes-price with-tax">
-                                                {form_field
-                                                form=$form
-                                                field='legacy_product_attribute_value_price_delta_with_tax'
-                                                value_key=$ID
-                                                }
-                                                    <label for="legacy-attribute-{$ID}-price-delta-with-tax">
-                                                        {$label}
-                                                    </label>
-                                                    <div class="input-group">
-                                                        <input id="legacy-attribute-{$ID}-price-delta-with-tax"
-                                                               name="{$name}"
-                                                               value="{$value}"
-                                                               type="text"
-                                                               class="price_field automatic_price_field form-control"
-                                                               data-rel-price="legacy-attribute-{$ID}-price-delta"
-                                                               data-price-type="price-with-tax">
-                                                        <span class="input-group-addon">{$currency_symbol}</span>
-                                                    </div>
-                                                {/form_field}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                {/loop}
-                                </tbody>
-                            </table>
+                                            </td>
+                                        </tr>
+                                    {/loop}
+                                    </table>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 {/loop}

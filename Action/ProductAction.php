@@ -5,12 +5,17 @@ namespace LegacyProductAttributes\Action;
 use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
 use LegacyProductAttributes\Event\ProductCheckEvent;
 use LegacyProductAttributes\Event\ProductGetPricesEvent;
+use LegacyProductAttributes\Event\UpdateStockEvent;
 use LegacyProductAttributes\Model\LegacyProductAttributeValue;
 use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
+use LegacyProductAttributes\Model\Map\LegacyProductAttributeValueTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
+use Propel\Runtime\Collection\ArrayCollection;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Model\CurrencyQuery;
 use Thelia\Model\ProductQuery;
+use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Model\Tools\ProductPriceTools;
 
 /**
@@ -24,6 +29,7 @@ class ProductAction implements EventSubscriberInterface
             LegacyProductAttributesEvents::PRODUCT_CHECK_LEGACY_ATTRIBUTES_APPLY
             => ['checkLegacyAttributesApply', 128],
             LegacyProductAttributesEvents::PRODUCT_GET_PRICES => ['getPrices', 128],
+            LegacyProductAttributesEvents::UPDATE_PRODUCT_STOCK => ['updateStock', 128]
         ];
     }
 
@@ -94,5 +100,31 @@ class ProductAction implements EventSubscriberInterface
         }
 
         $event->setPrices(new ProductPriceTools($price, $promoPrice));
+    }
+    
+    /**
+     * Update default PSE stock
+     *
+     * @param UpdateStockEvent $event
+     */
+    public function updateStock(UpdateStockEvent $event, $eventName, EventDispatcherInterface $dispatcher)
+    {
+        // Get total stock for product
+        /** @var ArrayCollection $stock */
+        $stock = LegacyProductAttributeValueQuery::create()
+            ->withColumn('sum(' . LegacyProductAttributeValueTableMap::STOCK . ')', 'total_stock')
+            ->select([ 'total_stock' ])
+            ->filterByProductId($event->getProductId())
+            ->filterByVisible(true)
+            ->find();
+        ;
+        
+        // Update PSE stock
+        if (! empty($stock) && null !== $pse = ProductSaleElementsQuery::create()
+                ->filterByProductId($event->getProductId())
+                ->filterByIsDefault(true)
+                ->findOne()) {
+            $pse->setQuantity($stock->getFirst())->save();
+        }
     }
 }

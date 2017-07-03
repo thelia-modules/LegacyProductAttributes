@@ -68,6 +68,27 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     protected $attribute_av_id;
 
     /**
+     * The value for the weight_delta field.
+     * Note: this column has a database default value of: 0
+     * @var        double
+     */
+    protected $weight_delta;
+
+    /**
+     * The value for the stock field.
+     * Note: this column has a database default value of: 0
+     * @var        int
+     */
+    protected $stock;
+
+    /**
+     * The value for the visible field.
+     * Note: this column has a database default value of: true
+     * @var        boolean
+     */
+    protected $visible;
+
+    /**
      * @var        Product
      */
     protected $aProduct;
@@ -86,10 +107,25 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
+     * Applies default values to this object.
+     * This method should be called from the object's constructor (or
+     * equivalent initialization method).
+     * @see __construct()
+     */
+    public function applyDefaultValues()
+    {
+        $this->weight_delta = 0;
+        $this->stock = 0;
+        $this->visible = true;
+    }
+
+    /**
      * Initializes internal state of LegacyProductAttributes\Model\Base\LegacyProductAttributeValue object.
+     * @see applyDefaults()
      */
     public function __construct()
     {
+        $this->applyDefaultValues();
     }
 
     /**
@@ -366,6 +402,39 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     }
 
     /**
+     * Get the [weight_delta] column value.
+     *
+     * @return   double
+     */
+    public function getWeightDelta()
+    {
+
+        return $this->weight_delta;
+    }
+
+    /**
+     * Get the [stock] column value.
+     *
+     * @return   int
+     */
+    public function getStock()
+    {
+
+        return $this->stock;
+    }
+
+    /**
+     * Get the [visible] column value.
+     *
+     * @return   boolean
+     */
+    public function getVisible()
+    {
+
+        return $this->visible;
+    }
+
+    /**
      * Set the value of [product_id] column.
      *
      * @param      int $v new value
@@ -416,6 +485,77 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     } // setAttributeAvId()
 
     /**
+     * Set the value of [weight_delta] column.
+     *
+     * @param      double $v new value
+     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValue The current object (for fluent API support)
+     */
+    public function setWeightDelta($v)
+    {
+        if ($v !== null) {
+            $v = (double) $v;
+        }
+
+        if ($this->weight_delta !== $v) {
+            $this->weight_delta = $v;
+            $this->modifiedColumns[LegacyProductAttributeValueTableMap::WEIGHT_DELTA] = true;
+        }
+
+
+        return $this;
+    } // setWeightDelta()
+
+    /**
+     * Set the value of [stock] column.
+     *
+     * @param      int $v new value
+     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValue The current object (for fluent API support)
+     */
+    public function setStock($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->stock !== $v) {
+            $this->stock = $v;
+            $this->modifiedColumns[LegacyProductAttributeValueTableMap::STOCK] = true;
+        }
+
+
+        return $this;
+    } // setStock()
+
+    /**
+     * Sets the value of the [visible] column.
+     * Non-boolean arguments are converted using the following rules:
+     *   * 1, '1', 'true',  'on',  and 'yes' are converted to boolean true
+     *   * 0, '0', 'false', 'off', and 'no'  are converted to boolean false
+     * Check on string values is case insensitive (so 'FaLsE' is seen as 'false').
+     *
+     * @param      boolean|integer|string $v The new value
+     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValue The current object (for fluent API support)
+     */
+    public function setVisible($v)
+    {
+        if ($v !== null) {
+            if (is_string($v)) {
+                $v = in_array(strtolower($v), array('false', 'off', '-', 'no', 'n', '0', '')) ? false : true;
+            } else {
+                $v = (boolean) $v;
+            }
+        }
+
+        if ($this->visible !== $v) {
+            $this->visible = $v;
+            $this->modifiedColumns[LegacyProductAttributeValueTableMap::VISIBLE] = true;
+        }
+
+
+        return $this;
+    } // setVisible()
+
+    /**
      * Indicates whether the columns in this object are only set to default values.
      *
      * This method can be used in conjunction with isModified() to indicate whether an object is both
@@ -425,6 +565,18 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
+            if ($this->weight_delta !== 0) {
+                return false;
+            }
+
+            if ($this->stock !== 0) {
+                return false;
+            }
+
+            if ($this->visible !== true) {
+                return false;
+            }
+
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -457,6 +609,15 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->attribute_av_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('WeightDelta', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->weight_delta = (null !== $col) ? (double) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('Stock', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->stock = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LegacyProductAttributeValueTableMap::translateFieldName('Visible', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->visible = (null !== $col) ? (boolean) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -465,7 +626,7 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 2; // 2 = LegacyProductAttributeValueTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = LegacyProductAttributeValueTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating \LegacyProductAttributes\Model\LegacyProductAttributeValue object", 0, $e);
@@ -703,6 +864,15 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID)) {
             $modifiedColumns[':p' . $index++]  = 'ATTRIBUTE_AV_ID';
         }
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::WEIGHT_DELTA)) {
+            $modifiedColumns[':p' . $index++]  = 'WEIGHT_DELTA';
+        }
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::STOCK)) {
+            $modifiedColumns[':p' . $index++]  = 'STOCK';
+        }
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::VISIBLE)) {
+            $modifiedColumns[':p' . $index++]  = 'VISIBLE';
+        }
 
         $sql = sprintf(
             'INSERT INTO legacy_product_attribute_value (%s) VALUES (%s)',
@@ -719,6 +889,15 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
                         break;
                     case 'ATTRIBUTE_AV_ID':
                         $stmt->bindValue($identifier, $this->attribute_av_id, PDO::PARAM_INT);
+                        break;
+                    case 'WEIGHT_DELTA':
+                        $stmt->bindValue($identifier, $this->weight_delta, PDO::PARAM_STR);
+                        break;
+                    case 'STOCK':
+                        $stmt->bindValue($identifier, $this->stock, PDO::PARAM_INT);
+                        break;
+                    case 'VISIBLE':
+                        $stmt->bindValue($identifier, (int) $this->visible, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -781,6 +960,15 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
             case 1:
                 return $this->getAttributeAvId();
                 break;
+            case 2:
+                return $this->getWeightDelta();
+                break;
+            case 3:
+                return $this->getStock();
+                break;
+            case 4:
+                return $this->getVisible();
+                break;
             default:
                 return null;
                 break;
@@ -812,6 +1000,9 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
         $result = array(
             $keys[0] => $this->getProductId(),
             $keys[1] => $this->getAttributeAvId(),
+            $keys[2] => $this->getWeightDelta(),
+            $keys[3] => $this->getStock(),
+            $keys[4] => $this->getVisible(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -865,6 +1056,15 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
             case 1:
                 $this->setAttributeAvId($value);
                 break;
+            case 2:
+                $this->setWeightDelta($value);
+                break;
+            case 3:
+                $this->setStock($value);
+                break;
+            case 4:
+                $this->setVisible($value);
+                break;
         } // switch()
     }
 
@@ -891,6 +1091,9 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
         if (array_key_exists($keys[0], $arr)) $this->setProductId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setAttributeAvId($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setWeightDelta($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setStock($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setVisible($arr[$keys[4]]);
     }
 
     /**
@@ -904,6 +1107,9 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
 
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::PRODUCT_ID)) $criteria->add(LegacyProductAttributeValueTableMap::PRODUCT_ID, $this->product_id);
         if ($this->isColumnModified(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID)) $criteria->add(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::WEIGHT_DELTA)) $criteria->add(LegacyProductAttributeValueTableMap::WEIGHT_DELTA, $this->weight_delta);
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::STOCK)) $criteria->add(LegacyProductAttributeValueTableMap::STOCK, $this->stock);
+        if ($this->isColumnModified(LegacyProductAttributeValueTableMap::VISIBLE)) $criteria->add(LegacyProductAttributeValueTableMap::VISIBLE, $this->visible);
 
         return $criteria;
     }
@@ -976,6 +1182,9 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     {
         $copyObj->setProductId($this->getProductId());
         $copyObj->setAttributeAvId($this->getAttributeAvId());
+        $copyObj->setWeightDelta($this->getWeightDelta());
+        $copyObj->setStock($this->getStock());
+        $copyObj->setVisible($this->getVisible());
         if ($makeNew) {
             $copyObj->setNew(true);
         }
@@ -1112,8 +1321,12 @@ abstract class LegacyProductAttributeValue implements ActiveRecordInterface
     {
         $this->product_id = null;
         $this->attribute_av_id = null;
+        $this->weight_delta = null;
+        $this->stock = null;
+        $this->visible = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
+        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);

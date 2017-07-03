@@ -1,12 +1,25 @@
 <?php
 
-return [
-    'Attributes configuration' => 'Configuration des déclinaisons',
-    'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.'
-    => 'Pour utiliser la methode alternative de configuration des déclinaisons sur ce produit, supprimez toutes ses combinaisons de déclinaisons.',
-    'To use attributes on this product, please select a product template.'
-    => 'Pour utiliser les déclinaisons sur ce produit, choisissez un template produit.',
+return array(
+    '<a href="#confirm-attributes-delete" data-toggle="modal">Click here</a> to delete all attributes combinations for this product and start to use alternative attribute management.' => '<a href="#confirm-attributes-delete" data-toggle="modal">Cliquez ici</a> pour supprimer toutes les combinaisons de déclinaisons de ce produit, et commencer à utiliser la gestion alternative des déclinaisons.',
+    'Active' => 'Active',
+    'Are you sure you want to delete all attribute combinations for this product ? This can\'t be undone.' => 'Êtes vous sûr(e) de vouloir supprimer toutes les combinaisons de déclinaisons de ce produit ? Cette action ne peut pas être annulée !',
+    'Attribute : %attr' => 'Déclinaison : %attr',
+    'Attribute value' => 'Valeur de déclinaison',
+    'Available stock' => 'Stock disponible',
+    'Click to toggle active state' => 'Cliquez pour inverser l\'état d\'activité',
+    'Close' => 'Fermer',
+    'Edit prices in %curr' => 'Éditer les prix en %curr',
     'Edit prices with taxes' => 'Éditer les prix avec taxes incluses',
-    'Price difference excluding taxes' => 'Différence de prix HT',
-    'Price difference including taxes' => 'Différence de prix taxes incluses',
-];
+    'No' => 'Non',
+    'Please confirm' => 'Merci de confirmer',
+    'Price delta with tax' => 'Différence de prix TTC',
+    'Price delta without tax' => 'Différence de prix HT',
+    'Save' => 'Enregistrer',
+    'Save and close' => 'Enregistrer et fermer',
+    'To use attributes on this product, please select a product template.' => 'Pour utiliser les déclinaisons sur ce produit, choisissez un template produit.',
+    'To use the alternative attributes configuration method on this product, please delete all its attributes combinations.' => 'Pour utiliser la methode alternative de configuration des déclinaisons sur ce produit, supprimez toutes ses combinaisons de déclinaisons.',
+    'Weight delta' => 'Différence de poids',
+    'Yes' => 'Oui',
+    'kg' => 'kg',
+);

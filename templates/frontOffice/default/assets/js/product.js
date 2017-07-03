@@ -5,27 +5,29 @@
     function initFormProductDetails() {
         var $formProductDetails = $('#form-product-details');
 
-        var productId = $formProductDetails.find('input[name="product_id"]').val();
-        var $insert = $('.form-product-details-legacy-product-attributes[data-product="'+productId+'"]');
-
-        if ($insert.length) {
-            $formProductDetails
-                .find('fieldset:eq(-0)')
-                .before($insert.html());
-
-            $('#pse-options').hide();
-        }
-
-        var $psePrice = $('#pse-price');
-        var $psePriceOld = $('#pse-price-old');
-
-        setProductPrices($formProductDetails, $psePrice, $psePriceOld);
-        setProductPseName();
-
-        $formProductDetails.on('change', '.pse-option', function () {
+        if ($formProductDetails.length > 0) {
+            var productId = $formProductDetails.find('input[name="product_id"]').val();
+            var $insert = $('.form-product-details-legacy-product-attributes[data-product="'+productId+'"]');
+    
+            if ($insert.length) {
+                $formProductDetails
+                    .find('fieldset:eq(-0)')
+                    .before($insert.html());
+    
+                $('#pse-options').hide();
+            }
+    
+            var $psePrice = $('#pse-price');
+            var $psePriceOld = $('#pse-price-old');
+    
             setProductPrices($formProductDetails, $psePrice, $psePriceOld);
             setProductPseName();
-        });
+            
+            $formProductDetails.on('change', '.pse-option', function () {
+                setProductPrices($formProductDetails, $psePrice, $psePriceOld);
+                setProductPseName();
+            });
+        }
     }
 
     initFormProductDetails();
@@ -46,7 +48,7 @@
         $
             .ajax({
                 type: 'POST',
-                url: '{url path="/admin/module/LegacyProductAttributes/product/get_prices"}',
+                url: '{url path="/module/LegacyProductAttributes/product/get_prices"}',
                 data: $formProductDetails.serialize()
             })
             .done(function (data) {

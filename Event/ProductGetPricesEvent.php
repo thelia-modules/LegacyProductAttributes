@@ -13,6 +13,8 @@ class ProductGetPricesEvent extends ActionEvent
     /** @var int */
     protected $productId;
     /** @var int */
+    protected $quantity;
+    /** @var int */
     protected $currencyId;
     /** @var ProductPriceTools */
     protected $basePrices;
@@ -22,9 +24,11 @@ class ProductGetPricesEvent extends ActionEvent
     /** @var ProductPriceTools */
     protected $prices;
 
-    public function __construct($productId)
+    public function __construct($productId, $quantity = 1)
     {
         $this->productId = $productId;
+        
+        $this->quantity = $quantity;
     }
 
     /**
@@ -119,6 +123,24 @@ class ProductGetPricesEvent extends ActionEvent
     {
         $this->prices = $prices;
 
+        return $this;
+    }
+    
+    /**
+     * @return int
+     */
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
+    
+    /**
+     * @param int $quantity
+     * @return $this
+     */
+    public function setQuantity($quantity)
+    {
+        $this->quantity = $quantity;
         return $this;
     }
 }

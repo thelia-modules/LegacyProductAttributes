@@ -2,14 +2,22 @@
 
 namespace LegacyProductAttributes\Form;
 
+use LegacyProductAttributes\LegacyProductAttributes;
+use LegacyProductAttributes\Model\Map\LegacyProductAttributeValueTableMap;
+use Propel\Runtime\ActiveQuery\Criteria;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Core\Event\TheliaFormEvent;
 use Thelia\Core\HttpFoundation\Request;
+use Thelia\Core\HttpFoundation\Session\Session;
+use Thelia\Core\Translation\Translator;
 use Thelia\Model\Attribute;
 use Thelia\Model\AttributeAv;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\AttributeQuery;
+use Thelia\Model\ConfigQuery;
+use Thelia\Model\Map\AttributeAvTableMap;
 use Thelia\Model\ProductQuery;
 
 /**
@@ -23,13 +31,13 @@ class CartAddFormExtension implements EventSubscriberInterface
     const LEGACY_PRODUCT_ATTRIBUTE_FIELD_PREFIX = 'legacy_product_attribute_';
 
     /**
-     * @var Request
+     * @var RequestStack
      */
-    protected $request;
+    protected $requestStack;
 
-    public function __construct(Request $request)
+    public function __construct(RequestStack $requestStack)
     {
-        $this->request = $request;
+        $this->requestStack = $requestStack;
     }
 
     public static function getSubscribedEvents()
@@ -47,8 +55,15 @@ class CartAddFormExtension implements EventSubscriberInterface
      */
     public function cartFormAfterBuild(TheliaFormEvent $event)
     {
+        /** @var Request $request */
+        $request = $this->requestStack->getCurrentRequest();
+
+        // Should we check available stock ?
+        $checkAvailableStock = ConfigQuery::checkAvailableStock();
+
         $sessionLocale = null;
-        $session = $this->request->getSession();
+        /** @var Session $session */
+        $session = $request->getSession();
         if ($session !== null) {
             $sessionLang = $session->getLang();
             if ($sessionLang !== null) {
@@ -56,7 +71,7 @@ class CartAddFormExtension implements EventSubscriberInterface
             }
         }
 
-        $product = ProductQuery::create()->findPk($this->request->getProductId());
+        $product = ProductQuery::create()->findPk($request->getProductId());
         if ($product === null || $product->getTemplate() === null) {
             return;
         }
@@ -67,16 +82,35 @@ class CartAddFormExtension implements EventSubscriberInterface
 
         /** @var Attribute $productAttribute */
         foreach ($productAttributes as $productAttribute) {
-            $attributeValues = AttributeAvQuery::create()
+            $attributeValuesQuery = AttributeAvQuery::create()
+                ->addJoin(AttributeAvTableMap::ID, LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID)
+                    ->add(LegacyProductAttributeValueTableMap::VISIBLE, true)
+                    ->add(LegacyProductAttributeValueTableMap::PRODUCT_ID, $product->getId())
+             ;
+
+            // Hide items without stock
+            if ($checkAvailableStock) {
+                $attributeValuesQuery
+                    ->add(LegacyProductAttributeValueTableMap::STOCK, 0, Criteria::GREATER_THAN);
+            }
+
+            $attributeValues = $attributeValuesQuery
+                ->orderByPosition()
                 ->findByAttributeId($productAttribute->getId());
 
             $choices = [];
-            /** @var AttributeAv $attributeValue */
-            foreach ($attributeValues as $attributeValue) {
-                if ($sessionLocale !== null) {
-                    $attributeValue->setLocale($sessionLocale);
+
+            if (true === $withOptions = $attributeValues->count() > 0) {
+                /** @var AttributeAv $attributeValue */
+                foreach ($attributeValues as $attributeValue) {
+                    if ($sessionLocale !== null) {
+                        $attributeValue->setLocale($sessionLocale);
+                    }
+
+                    $choices[$attributeValue->getId()] = $attributeValue->getTitle();
                 }
-                $choices[$attributeValue->getId()] = $attributeValue->getTitle();
+            } else {
+                $choices[0] = Translator::getInstance()->trans("None available", [], LegacyProductAttributes::MESSAGE_DOMAIN);
             }
 
             $event->getForm()->getFormBuilder()
@@ -86,6 +120,7 @@ class CartAddFormExtension implements EventSubscriberInterface
                     [
                         'choices' => $choices,
                         'required' => true,
+                        'disabled' => ! $withOptions
                     ]
                 );
         }

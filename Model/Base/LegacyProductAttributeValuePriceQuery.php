@@ -56,12 +56,12 @@ use Thelia\Model\Product;
  * @method     ChildLegacyProductAttributeValuePrice findOneByProductId(int $product_id) Return the first ChildLegacyProductAttributeValuePrice filtered by the product_id column
  * @method     ChildLegacyProductAttributeValuePrice findOneByAttributeAvId(int $attribute_av_id) Return the first ChildLegacyProductAttributeValuePrice filtered by the attribute_av_id column
  * @method     ChildLegacyProductAttributeValuePrice findOneByCurrencyId(int $currency_id) Return the first ChildLegacyProductAttributeValuePrice filtered by the currency_id column
- * @method     ChildLegacyProductAttributeValuePrice findOneByDelta(double $delta) Return the first ChildLegacyProductAttributeValuePrice filtered by the delta column
+ * @method     ChildLegacyProductAttributeValuePrice findOneByDelta(string $delta) Return the first ChildLegacyProductAttributeValuePrice filtered by the delta column
  *
  * @method     array findByProductId(int $product_id) Return ChildLegacyProductAttributeValuePrice objects filtered by the product_id column
  * @method     array findByAttributeAvId(int $attribute_av_id) Return ChildLegacyProductAttributeValuePrice objects filtered by the attribute_av_id column
  * @method     array findByCurrencyId(int $currency_id) Return ChildLegacyProductAttributeValuePrice objects filtered by the currency_id column
- * @method     array findByDelta(double $delta) Return ChildLegacyProductAttributeValuePrice objects filtered by the delta column
+ * @method     array findByDelta(string $delta) Return ChildLegacyProductAttributeValuePrice objects filtered by the delta column
  *
  */
 abstract class LegacyProductAttributeValuePriceQuery extends ModelCriteria

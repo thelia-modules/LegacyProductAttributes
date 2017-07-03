@@ -20,4 +20,12 @@
     $usePriceWithTaxSwitch.change(function() {
         switchLegacyAttributesPriceFields($(this).prop('checked'));
     });
+    
+    $('[data-toggle-attribute-av]').click(function(ev) {
+        var attributeId = $(this).data('toggle-attribute-av');
+    
+        $('[data-attribute-id='+attributeId+']').click();
+        
+       ev.preventDefault();
+    });
 })(jQuery);

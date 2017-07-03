@@ -3,7 +3,9 @@
 namespace LegacyProductAttributes\Form;
 
 use LegacyProductAttributes\LegacyProductAttributes;
+use LegacyProductAttributes\Model\LegacyProductAttributeDeltaQuery;
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery;
+use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Thelia\Core\Translation\Translator;
 use Thelia\Form\BaseForm;
@@ -95,6 +97,7 @@ class LegacyProductAttributesValuesForm extends BaseForm
 
             $priceDelta = 0;
             $priceDeltaWithTax = 0;
+            
             if (null !== $legacyProductAttributeValuePrice) {
                 $priceDelta = $legacyProductAttributeValuePrice->getDelta();
                 $priceDeltaWithTax = $taxCalculator->getTaxedPrice($legacyProductAttributeValuePrice->getDelta());
@@ -106,9 +109,68 @@ class LegacyProductAttributesValuesForm extends BaseForm
                 = $numberFormatter->formatStandardNumber($priceDelta);
             $formData['price_delta_with_tax'][$productAttributeAv->getId()]
                 = $numberFormatter->formatStandardNumber($priceDeltaWithTax);
+            
+            // Get other delta
+            if (null !== $delta = LegacyProductAttributeValueQuery::create()->findPk([
+                $product->getId(),
+                $productAttributeAv->getId()
+            ])) {
+                $formData['visible'][$productAttributeAv->getId()] = $delta->getVisible();
+                $formData['stock'][$productAttributeAv->getId()] = $delta->getStock();
+                $formData['weight_delta'][$productAttributeAv->getId()] = $delta->getWeightDelta();
+            } else {
+                $formData['visible'][$productAttributeAv->getId()] = true;
+                $formData['stock'][$productAttributeAv->getId()] = 0;
+                $formData['weight_delta'][$productAttributeAv->getId()] = 0;
+            }
         }
 
         $this->formBuilder
+            ->add(
+                'legacy_product_attribute_value_visible',
+                'collection',
+                [
+                    'label' => Translator::getInstance()->trans(
+                        'Visible',
+                        [],
+                        LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                    ),
+                    'type' => 'checkbox',
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'data' => $formData['visible']
+                ]
+            )
+            ->add(
+                'legacy_product_attribute_value_stock',
+                'collection',
+                [
+                    'label' => Translator::getInstance()->trans(
+                        'Available stock',
+                        [],
+                        LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                    ),
+                    'type' => 'number',
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'data' => $formData['stock'],
+                ]
+            )
+            ->add(
+                'legacy_product_attribute_value_weight_delta',
+                'collection',
+                [
+                    'label' => Translator::getInstance()->trans(
+                        'Weight difference ',
+                        [],
+                        LegacyProductAttributes::MESSAGE_DOMAIN_BO
+                    ),
+                    'type' => 'number',
+                    'allow_add' => true,
+                    'allow_delete' => true,
+                    'data' => $formData['weight_delta'],
+                ]
+            )
             ->add(
                 'legacy_product_attribute_value_price_delta',
                 'collection',

@@ -10,6 +10,7 @@ use LegacyProductAttributes\Model\LegacyCartItemAttributeCombinationQuery;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Action\Cart;
 use Thelia\Core\Event\Cart\CartEvent;
+use Thelia\Core\Event\Cart\CartItemDuplicationItem;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Model\Attribute;
 use Thelia\Model\Cart as CartModel;
@@ -30,29 +31,17 @@ class CartAction extends Cart
      */
     protected $legacyProductAttributes = [];
 
-    public static function getSubscribedEvents()
-    {
-        return [
-            // must run before the Thelia cart action
-            TheliaEvents::CART_ADDITEM => ['addItem', 192],
-        ];
-    }
-
     /**
      * Manage adding an item to the cart when our legacy product attributes are used.
      *
      * @param CartEvent $event
      */
-    public function addItem(CartEvent $event)
+    public function addItem(CartEvent $event, $eventName, EventDispatcherInterface $dispatcher)
     {
         $this->getLegacyProductAttributes($event);
 
         // call the parent method, but using our redefined sub-methods
-        parent::addItem($event);
-
-        // prevent the parent event from adding the item
-        $event->setNewness(false);
-        $event->setAppend(false);
+        parent::addItem($event, $eventName, $dispatcher);
     }
 
     /**
@@ -79,42 +68,45 @@ class CartAction extends Cart
     }
 
     /**
-     * @inheritdoc
+     * Find a specific record in CartItem table using the current CartEvent
      *
-     * Find a possible existing cart item by also filtering on our cart item attribute combinations.
+     * @param CartEvent $event the cart event
      */
-    protected function findItem($cartId, $productId, $productSaleElementsId)
+    public function findCartItem(CartEvent $event)
     {
-        // no legacy attributes, let the parent handle it
-        if (empty($this->legacyProductAttributes)) {
-            return parent::findItem($cartId, $productId, $productSaleElementsId);
-        }
+        // Do not try to find a cartItem if one exists in the event,
+        // as previous event handlers may have put it in th event.
+        if (null === $event->getCartItem()) {
+            // Do something if legacy attributes are defined
+            if (!empty($this->legacyProductAttributes)) {
+                $query = CartItemQuery::create();
 
-        $query = CartItemQuery::create();
+                $query
+                    ->filterByCartId($event->getCart()->getId())
+                    ->filterByProductId($event->getProduct())
+                    ->filterByProductSaleElementsId($event->getProductSaleElementsId());
 
-        $query
-            ->filterByCartId($cartId)
-            ->filterByProductId($productId)
-            ->filterByProductSaleElementsId($productSaleElementsId);
+                /** @var CartItem $cartItem */
+                foreach ($query->find() as $cartItem) {
+                    $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()
+                        ->findByCartItemId($cartItem->getId());
 
-        /** @var CartItem $cartItem */
-        foreach ($query->find() as $cartItem) {
-            $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()
-                ->findByCartItemId($cartItem->getId());
+                    $cartItemLegacyProductAttributes = [];
+                    /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
+                    foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
+                        $cartItemLegacyProductAttributes[$legacyCartItemAttributeCombination->getAttributeId()]
+                            = $legacyCartItemAttributeCombination->getAttributeAvId();
+                    }
 
-            $cartItemLegacyProductAttributes = [];
-            /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
-            foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
-                $cartItemLegacyProductAttributes[$legacyCartItemAttributeCombination->getAttributeId()]
-                    = $legacyCartItemAttributeCombination->getAttributeAvId();
+                    if ($cartItemLegacyProductAttributes == $this->legacyProductAttributes) {
+                        $event->setCartItem($cartItem);
+                        break;
+                    }
+                }
+            } else {
+                parent::findCartItem($event);
             }
-
-            if ($cartItemLegacyProductAttributes == $this->legacyProductAttributes) {
-                return $cartItem;
-            }
         }
-
-        return null;
     }
 
     /**
@@ -131,6 +123,10 @@ class CartAction extends Cart
         $quantity,
         ProductPriceTools $productPrices
     ) {
+        if (empty($this->legacyProductAttributes)) {
+            return parent::doAddItem($dispatcher, $cart, $productId, $productSaleElements, $quantity, $productPrices);
+        }
+
         // get the adjusted price
         $productGetPricesEvent = (new ProductGetPricesEvent($productId))
             ->setCurrencyId($cart->getCurrencyId())
@@ -138,6 +134,7 @@ class CartAction extends Cart
             ->setLegacyProductAttributes($this->legacyProductAttributes);
 
         $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
+
         if (null !== $productGetPricesEvent->getPrices()) {
             $productPrices = $productGetPricesEvent->getPrices();
         }
@@ -154,5 +151,67 @@ class CartAction extends Cart
         }
 
         return $cartItem;
+    }
+
+    /**
+     * Manage cart iteml duplication.
+     *
+     * @param CartItemDuplicationItem $event
+     * @param $eventName
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function cartItemDuplication(CartItemDuplicationItem $event, $eventName, EventDispatcherInterface $dispatcher)
+    {
+        $oldCartItem = $event->getOldItem();
+        $newCartItem = $event->getNewItem();
+
+        $legacyAttributeCombinations =
+            LegacyCartItemAttributeCombinationQuery::create()->findByCartItemId($oldCartItem->getId());
+
+        $legacyProductAttributes = [];
+
+        /** @var  LegacyCartItemAttributeCombination $legacyAttributeCombination */
+        foreach ($legacyAttributeCombinations as $legacyAttributeCombination) {
+            // Create CartItemAttributeCombination for the new cart item.
+            (new LegacyCartItemAttributeCombination())
+                ->setCartItemId($event->getNewItem()->getId())
+                ->setAttributeId($legacyAttributeCombination->getAttributeId())
+                ->setAttributeAvId($legacyAttributeCombination->getAttributeAvId())
+                ->save();
+
+            $legacyProductAttributes[$legacyAttributeCombination->getAttributeId()] = $legacyAttributeCombination->getAttributeAvId();
+        }
+
+        // Adjust cart item price
+        $productPrices = new ProductPriceTools(
+            $newCartItem->getPrice(),
+            $newCartItem->getPromoPrice()
+        );
+
+        $productGetPricesEvent = (new ProductGetPricesEvent($event->getOldItem()->getProductId()))
+            ->setCurrencyId($newCartItem->getCart()->getCurrencyId())
+            ->setBasePrices($productPrices)
+            ->setLegacyProductAttributes($legacyProductAttributes);
+
+        $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
+
+        if (null !== $productGetPricesEvent->getPrices()) {
+            $productPrices = $productGetPricesEvent->getPrices();
+
+            $newCartItem
+                ->setPrice($productPrices->getPrice())
+                ->setPromoPrice($productPrices->getPromoPrice())
+                ->save();
+            ;
+        }
+    }
+
+    public static function getSubscribedEvents()
+    {
+        $events = parent::getSubscribedEvents();
+
+        $events[TheliaEvents::CART_ITEM_DUPLICATE] = ['cartItemDuplication', 128];
+
+        return $events;
     }
 }

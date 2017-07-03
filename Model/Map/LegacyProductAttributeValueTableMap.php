@@ -58,7 +58,7 @@ class LegacyProductAttributeValueTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 2;
+    const NUM_COLUMNS = 5;
 
     /**
      * The number of lazy-loaded columns
@@ -68,7 +68,7 @@ class LegacyProductAttributeValueTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 2;
+    const NUM_HYDRATE_COLUMNS = 5;
 
     /**
      * the column name for the PRODUCT_ID field
@@ -79,6 +79,21 @@ class LegacyProductAttributeValueTableMap extends TableMap
      * the column name for the ATTRIBUTE_AV_ID field
      */
     const ATTRIBUTE_AV_ID = 'legacy_product_attribute_value.ATTRIBUTE_AV_ID';
+
+    /**
+     * the column name for the WEIGHT_DELTA field
+     */
+    const WEIGHT_DELTA = 'legacy_product_attribute_value.WEIGHT_DELTA';
+
+    /**
+     * the column name for the STOCK field
+     */
+    const STOCK = 'legacy_product_attribute_value.STOCK';
+
+    /**
+     * the column name for the VISIBLE field
+     */
+    const VISIBLE = 'legacy_product_attribute_value.VISIBLE';
 
     /**
      * The default string format for model objects of the related table
@@ -92,12 +107,12 @@ class LegacyProductAttributeValueTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('ProductId', 'AttributeAvId', ),
-        self::TYPE_STUDLYPHPNAME => array('productId', 'attributeAvId', ),
-        self::TYPE_COLNAME       => array(LegacyProductAttributeValueTableMap::PRODUCT_ID, LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, ),
-        self::TYPE_RAW_COLNAME   => array('PRODUCT_ID', 'ATTRIBUTE_AV_ID', ),
-        self::TYPE_FIELDNAME     => array('product_id', 'attribute_av_id', ),
-        self::TYPE_NUM           => array(0, 1, )
+        self::TYPE_PHPNAME       => array('ProductId', 'AttributeAvId', 'WeightDelta', 'Stock', 'Visible', ),
+        self::TYPE_STUDLYPHPNAME => array('productId', 'attributeAvId', 'weightDelta', 'stock', 'visible', ),
+        self::TYPE_COLNAME       => array(LegacyProductAttributeValueTableMap::PRODUCT_ID, LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID, LegacyProductAttributeValueTableMap::WEIGHT_DELTA, LegacyProductAttributeValueTableMap::STOCK, LegacyProductAttributeValueTableMap::VISIBLE, ),
+        self::TYPE_RAW_COLNAME   => array('PRODUCT_ID', 'ATTRIBUTE_AV_ID', 'WEIGHT_DELTA', 'STOCK', 'VISIBLE', ),
+        self::TYPE_FIELDNAME     => array('product_id', 'attribute_av_id', 'weight_delta', 'stock', 'visible', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -107,12 +122,12 @@ class LegacyProductAttributeValueTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('ProductId' => 0, 'AttributeAvId' => 1, ),
-        self::TYPE_STUDLYPHPNAME => array('productId' => 0, 'attributeAvId' => 1, ),
-        self::TYPE_COLNAME       => array(LegacyProductAttributeValueTableMap::PRODUCT_ID => 0, LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID => 1, ),
-        self::TYPE_RAW_COLNAME   => array('PRODUCT_ID' => 0, 'ATTRIBUTE_AV_ID' => 1, ),
-        self::TYPE_FIELDNAME     => array('product_id' => 0, 'attribute_av_id' => 1, ),
-        self::TYPE_NUM           => array(0, 1, )
+        self::TYPE_PHPNAME       => array('ProductId' => 0, 'AttributeAvId' => 1, 'WeightDelta' => 2, 'Stock' => 3, 'Visible' => 4, ),
+        self::TYPE_STUDLYPHPNAME => array('productId' => 0, 'attributeAvId' => 1, 'weightDelta' => 2, 'stock' => 3, 'visible' => 4, ),
+        self::TYPE_COLNAME       => array(LegacyProductAttributeValueTableMap::PRODUCT_ID => 0, LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID => 1, LegacyProductAttributeValueTableMap::WEIGHT_DELTA => 2, LegacyProductAttributeValueTableMap::STOCK => 3, LegacyProductAttributeValueTableMap::VISIBLE => 4, ),
+        self::TYPE_RAW_COLNAME   => array('PRODUCT_ID' => 0, 'ATTRIBUTE_AV_ID' => 1, 'WEIGHT_DELTA' => 2, 'STOCK' => 3, 'VISIBLE' => 4, ),
+        self::TYPE_FIELDNAME     => array('product_id' => 0, 'attribute_av_id' => 1, 'weight_delta' => 2, 'stock' => 3, 'visible' => 4, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, 4, )
     );
 
     /**
@@ -133,6 +148,9 @@ class LegacyProductAttributeValueTableMap extends TableMap
         // columns
         $this->addForeignPrimaryKey('PRODUCT_ID', 'ProductId', 'INTEGER' , 'product', 'ID', true, null, null);
         $this->addForeignPrimaryKey('ATTRIBUTE_AV_ID', 'AttributeAvId', 'INTEGER' , 'attribute_av', 'ID', true, null, null);
+        $this->addColumn('WEIGHT_DELTA', 'WeightDelta', 'FLOAT', true, null, 0);
+        $this->addColumn('STOCK', 'Stock', 'INTEGER', false, null, 0);
+        $this->addColumn('VISIBLE', 'Visible', 'BOOLEAN', false, 1, true);
     } // initialize()
 
     /**
@@ -333,9 +351,15 @@ class LegacyProductAttributeValueTableMap extends TableMap
         if (null === $alias) {
             $criteria->addSelectColumn(LegacyProductAttributeValueTableMap::PRODUCT_ID);
             $criteria->addSelectColumn(LegacyProductAttributeValueTableMap::ATTRIBUTE_AV_ID);
+            $criteria->addSelectColumn(LegacyProductAttributeValueTableMap::WEIGHT_DELTA);
+            $criteria->addSelectColumn(LegacyProductAttributeValueTableMap::STOCK);
+            $criteria->addSelectColumn(LegacyProductAttributeValueTableMap::VISIBLE);
         } else {
             $criteria->addSelectColumn($alias . '.PRODUCT_ID');
             $criteria->addSelectColumn($alias . '.ATTRIBUTE_AV_ID');
+            $criteria->addSelectColumn($alias . '.WEIGHT_DELTA');
+            $criteria->addSelectColumn($alias . '.STOCK');
+            $criteria->addSelectColumn($alias . '.VISIBLE');
         }
     }
 

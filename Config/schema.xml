@@ -6,6 +6,9 @@
     <table name="legacy_product_attribute_value" namespace="LegacyProductAttributes\Model">
         <column name="product_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="attribute_av_id" type="INTEGER" required="true" primaryKey="true"/>
+        <column name="weight_delta" type="FLOAT" required="true"  defaultValue="0" />
+        <column name="stock" type="INTEGER" required="false" defaultValue="0"/>
+        <column name="visible" defaultValue="1" type="boolean"/>
 
         <foreign-key foreignTable="product" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference local="product_id" foreign="id"/>
@@ -19,7 +22,7 @@
         <column name="product_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="attribute_av_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="currency_id" type="INTEGER" required="true" primaryKey="true"/>
-        <column name="delta" type="FLOAT" required="false" defaultValue="0"/>
+        <column name="delta" defaultValue="0.000000" scale="6" size="16" type="DECIMAL" required="false"/>
 
         <foreign-key foreignTable="product" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference local="product_id" foreign="id"/>
@@ -33,6 +36,7 @@
     </table>
 
     <table name="legacy_cart_item_attribute_combination" namespace="LegacyProductAttributes\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
         <column name="cart_item_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="attribute_id" type="INTEGER" required="true" primaryKey="true"/>
         <column name="attribute_av_id" type="INTEGER" required="true"/>
@@ -43,6 +47,26 @@
         <foreign-key foreignTable="attribute" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference local="attribute_id" foreign="id"/>
         </foreign-key>
+        <foreign-key foreignTable="attribute_av" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference local="attribute_av_id" foreign="id"/>
+        </foreign-key>
+    </table>
+
+    <table name="legacy_order_product_attribute_combination" namespace="LegacyProductAttributes\Model">
+        <column autoIncrement="true" name="id" primaryKey="true" required="true" type="INTEGER"/>
+        <column name="order_product_id" type="INTEGER" required="true"/>
+        <column name="product_id" type="INTEGER" required="true"/>
+        <column name="attribute_av_id" type="INTEGER" required="true"/>
+        <column name="quantity" type="INTEGER" required="true"/>
+
+        <index>
+            <index-column name="order_product_id" />
+        </index>
+
+        <foreign-key foreignTable="order_product" onDelete="CASCADE" onUpdate="RESTRICT">
+            <reference local="order_product_id" foreign="id"/>
+        </foreign-key>
+
         <foreign-key foreignTable="attribute_av" onDelete="CASCADE" onUpdate="RESTRICT">
             <reference local="attribute_av_id" foreign="id"/>
         </foreign-key>

@@ -4,8 +4,8 @@ namespace LegacyProductAttributes\Model\Base;
 
 use \Exception;
 use \PDO;
-use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery as ChildLegacyProductAttributeValuePriceQuery;
-use LegacyProductAttributes\Model\Map\LegacyProductAttributeValuePriceTableMap;
+use LegacyProductAttributes\Model\LegacyOrderProductAttributeCombinationQuery as ChildLegacyOrderProductAttributeCombinationQuery;
+use LegacyProductAttributes\Model\Map\LegacyOrderProductAttributeCombinationTableMap;
 use Propel\Runtime\Propel;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Propel\Runtime\ActiveQuery\ModelCriteria;
@@ -18,17 +18,15 @@ use Propel\Runtime\Map\TableMap;
 use Propel\Runtime\Parser\AbstractParser;
 use Thelia\Model\AttributeAvQuery;
 use Thelia\Model\AttributeAv as ChildAttributeAv;
-use Thelia\Model\Currency as ChildCurrency;
-use Thelia\Model\Product as ChildProduct;
-use Thelia\Model\CurrencyQuery;
-use Thelia\Model\ProductQuery;
+use Thelia\Model\OrderProduct as ChildOrderProduct;
+use Thelia\Model\OrderProductQuery;
 
-abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
+abstract class LegacyOrderProductAttributeCombination implements ActiveRecordInterface
 {
     /**
      * TableMap class name
      */
-    const TABLE_MAP = '\\LegacyProductAttributes\\Model\\Map\\LegacyProductAttributeValuePriceTableMap';
+    const TABLE_MAP = '\\LegacyProductAttributes\\Model\\Map\\LegacyOrderProductAttributeCombinationTableMap';
 
 
     /**
@@ -58,6 +56,18 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
+     * The value for the id field.
+     * @var        int
+     */
+    protected $id;
+
+    /**
+     * The value for the order_product_id field.
+     * @var        int
+     */
+    protected $order_product_id;
+
+    /**
      * The value for the product_id field.
      * @var        int
      */
@@ -70,32 +80,20 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     protected $attribute_av_id;
 
     /**
-     * The value for the currency_id field.
+     * The value for the quantity field.
      * @var        int
      */
-    protected $currency_id;
+    protected $quantity;
 
     /**
-     * The value for the delta field.
-     * Note: this column has a database default value of: '0.000000'
-     * @var        string
+     * @var        OrderProduct
      */
-    protected $delta;
-
-    /**
-     * @var        Product
-     */
-    protected $aProduct;
+    protected $aOrderProduct;
 
     /**
      * @var        AttributeAv
      */
     protected $aAttributeAv;
-
-    /**
-     * @var        Currency
-     */
-    protected $aCurrency;
 
     /**
      * Flag to prevent endless save loop, if this object is referenced
@@ -106,23 +104,10 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     protected $alreadyInSave = false;
 
     /**
-     * Applies default values to this object.
-     * This method should be called from the object's constructor (or
-     * equivalent initialization method).
-     * @see __construct()
-     */
-    public function applyDefaultValues()
-    {
-        $this->delta = '0.000000';
-    }
-
-    /**
-     * Initializes internal state of LegacyProductAttributes\Model\Base\LegacyProductAttributeValuePrice object.
-     * @see applyDefaults()
+     * Initializes internal state of LegacyProductAttributes\Model\Base\LegacyOrderProductAttributeCombination object.
      */
     public function __construct()
     {
-        $this->applyDefaultValues();
     }
 
     /**
@@ -214,9 +199,9 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     }
 
     /**
-     * Compares this with another <code>LegacyProductAttributeValuePrice</code> instance.  If
-     * <code>obj</code> is an instance of <code>LegacyProductAttributeValuePrice</code>, delegates to
-     * <code>equals(LegacyProductAttributeValuePrice)</code>.  Otherwise, returns <code>false</code>.
+     * Compares this with another <code>LegacyOrderProductAttributeCombination</code> instance.  If
+     * <code>obj</code> is an instance of <code>LegacyOrderProductAttributeCombination</code>, delegates to
+     * <code>equals(LegacyOrderProductAttributeCombination)</code>.  Otherwise, returns <code>false</code>.
      *
      * @param  mixed   $obj The object to compare to.
      * @return boolean Whether equal to the object specified.
@@ -299,7 +284,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      * @param string $name  The virtual column name
      * @param mixed  $value The value to give to the virtual column
      *
-     * @return LegacyProductAttributeValuePrice The current object, for fluid interface
+     * @return LegacyOrderProductAttributeCombination The current object, for fluid interface
      */
     public function setVirtualColumn($name, $value)
     {
@@ -331,7 +316,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      *                       or a format name ('XML', 'YAML', 'JSON', 'CSV')
      * @param string $data The source data to import from
      *
-     * @return LegacyProductAttributeValuePrice The current object, for fluid interface
+     * @return LegacyOrderProductAttributeCombination The current object, for fluid interface
      */
     public function importFrom($parser, $data)
     {
@@ -377,6 +362,28 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     }
 
     /**
+     * Get the [id] column value.
+     *
+     * @return   int
+     */
+    public function getId()
+    {
+
+        return $this->id;
+    }
+
+    /**
+     * Get the [order_product_id] column value.
+     *
+     * @return   int
+     */
+    public function getOrderProductId()
+    {
+
+        return $this->order_product_id;
+    }
+
+    /**
      * Get the [product_id] column value.
      *
      * @return   int
@@ -399,32 +406,67 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     }
 
     /**
-     * Get the [currency_id] column value.
+     * Get the [quantity] column value.
      *
      * @return   int
      */
-    public function getCurrencyId()
+    public function getQuantity()
     {
 
-        return $this->currency_id;
+        return $this->quantity;
     }
 
     /**
-     * Get the [delta] column value.
+     * Set the value of [id] column.
      *
-     * @return   string
+     * @param      int $v new value
+     * @return   \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      */
-    public function getDelta()
+    public function setId($v)
     {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
 
-        return $this->delta;
-    }
+        if ($this->id !== $v) {
+            $this->id = $v;
+            $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::ID] = true;
+        }
+
+
+        return $this;
+    } // setId()
+
+    /**
+     * Set the value of [order_product_id] column.
+     *
+     * @param      int $v new value
+     * @return   \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
+     */
+    public function setOrderProductId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->order_product_id !== $v) {
+            $this->order_product_id = $v;
+            $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::ORDER_PRODUCT_ID] = true;
+        }
+
+        if ($this->aOrderProduct !== null && $this->aOrderProduct->getId() !== $v) {
+            $this->aOrderProduct = null;
+        }
+
+
+        return $this;
+    } // setOrderProductId()
 
     /**
      * Set the value of [product_id] column.
      *
      * @param      int $v new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
+     * @return   \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      */
     public function setProductId($v)
     {
@@ -434,11 +476,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
 
         if ($this->product_id !== $v) {
             $this->product_id = $v;
-            $this->modifiedColumns[LegacyProductAttributeValuePriceTableMap::PRODUCT_ID] = true;
-        }
-
-        if ($this->aProduct !== null && $this->aProduct->getId() !== $v) {
-            $this->aProduct = null;
+            $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::PRODUCT_ID] = true;
         }
 
 
@@ -449,7 +487,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      * Set the value of [attribute_av_id] column.
      *
      * @param      int $v new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
+     * @return   \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      */
     public function setAttributeAvId($v)
     {
@@ -459,7 +497,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
 
         if ($this->attribute_av_id !== $v) {
             $this->attribute_av_id = $v;
-            $this->modifiedColumns[LegacyProductAttributeValuePriceTableMap::ATTRIBUTE_AV_ID] = true;
+            $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::ATTRIBUTE_AV_ID] = true;
         }
 
         if ($this->aAttributeAv !== null && $this->aAttributeAv->getId() !== $v) {
@@ -471,50 +509,25 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     } // setAttributeAvId()
 
     /**
-     * Set the value of [currency_id] column.
+     * Set the value of [quantity] column.
      *
      * @param      int $v new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
+     * @return   \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      */
-    public function setCurrencyId($v)
+    public function setQuantity($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->currency_id !== $v) {
-            $this->currency_id = $v;
-            $this->modifiedColumns[LegacyProductAttributeValuePriceTableMap::CURRENCY_ID] = true;
-        }
-
-        if ($this->aCurrency !== null && $this->aCurrency->getId() !== $v) {
-            $this->aCurrency = null;
+        if ($this->quantity !== $v) {
+            $this->quantity = $v;
+            $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::QUANTITY] = true;
         }
 
 
         return $this;
-    } // setCurrencyId()
-
-    /**
-     * Set the value of [delta] column.
-     *
-     * @param      string $v new value
-     * @return   \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
-     */
-    public function setDelta($v)
-    {
-        if ($v !== null) {
-            $v = (string) $v;
-        }
-
-        if ($this->delta !== $v) {
-            $this->delta = $v;
-            $this->modifiedColumns[LegacyProductAttributeValuePriceTableMap::DELTA] = true;
-        }
-
-
-        return $this;
-    } // setDelta()
+    } // setQuantity()
 
     /**
      * Indicates whether the columns in this object are only set to default values.
@@ -526,10 +539,6 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function hasOnlyDefaultValues()
     {
-            if ($this->delta !== '0.000000') {
-                return false;
-            }
-
         // otherwise, everything was equal, so return TRUE
         return true;
     } // hasOnlyDefaultValues()
@@ -557,17 +566,20 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LegacyProductAttributeValuePriceTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LegacyOrderProductAttributeCombinationTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyOrderProductAttributeCombinationTableMap::translateFieldName('OrderProductId', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->order_product_id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyOrderProductAttributeCombinationTableMap::translateFieldName('ProductId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->product_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyProductAttributeValuePriceTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LegacyOrderProductAttributeCombinationTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->attribute_av_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyProductAttributeValuePriceTableMap::translateFieldName('CurrencyId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->currency_id = (null !== $col) ? (int) $col : null;
-
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LegacyProductAttributeValuePriceTableMap::translateFieldName('Delta', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->delta = (null !== $col) ? (string) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 4 + $startcol : LegacyOrderProductAttributeCombinationTableMap::translateFieldName('Quantity', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->quantity = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
             $this->setNew(false);
@@ -576,10 +588,10 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
                 $this->ensureConsistency();
             }
 
-            return $startcol + 4; // 4 = LegacyProductAttributeValuePriceTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 5; // 5 = LegacyOrderProductAttributeCombinationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
-            throw new PropelException("Error populating \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice object", 0, $e);
+            throw new PropelException("Error populating \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination object", 0, $e);
         }
     }
 
@@ -598,14 +610,11 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aProduct !== null && $this->product_id !== $this->aProduct->getId()) {
-            $this->aProduct = null;
+        if ($this->aOrderProduct !== null && $this->order_product_id !== $this->aOrderProduct->getId()) {
+            $this->aOrderProduct = null;
         }
         if ($this->aAttributeAv !== null && $this->attribute_av_id !== $this->aAttributeAv->getId()) {
             $this->aAttributeAv = null;
-        }
-        if ($this->aCurrency !== null && $this->currency_id !== $this->aCurrency->getId()) {
-            $this->aCurrency = null;
         }
     } // ensureConsistency
 
@@ -630,13 +639,13 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getReadConnection(LegacyProductAttributeValuePriceTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getReadConnection(LegacyOrderProductAttributeCombinationTableMap::DATABASE_NAME);
         }
 
         // We don't need to alter the object instance pool; we're just modifying this instance
         // already in the pool.
 
-        $dataFetcher = ChildLegacyProductAttributeValuePriceQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
+        $dataFetcher = ChildLegacyOrderProductAttributeCombinationQuery::create(null, $this->buildPkeyCriteria())->setFormatter(ModelCriteria::FORMAT_STATEMENT)->find($con);
         $row = $dataFetcher->fetch();
         $dataFetcher->close();
         if (!$row) {
@@ -646,9 +655,8 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
 
         if ($deep) {  // also de-associate any related objects?
 
-            $this->aProduct = null;
+            $this->aOrderProduct = null;
             $this->aAttributeAv = null;
-            $this->aCurrency = null;
         } // if (deep)
     }
 
@@ -658,8 +666,8 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      * @param      ConnectionInterface $con
      * @return void
      * @throws PropelException
-     * @see LegacyProductAttributeValuePrice::setDeleted()
-     * @see LegacyProductAttributeValuePrice::isDeleted()
+     * @see LegacyOrderProductAttributeCombination::setDeleted()
+     * @see LegacyOrderProductAttributeCombination::isDeleted()
      */
     public function delete(ConnectionInterface $con = null)
     {
@@ -668,12 +676,12 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LegacyProductAttributeValuePriceTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LegacyOrderProductAttributeCombinationTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
         try {
-            $deleteQuery = ChildLegacyProductAttributeValuePriceQuery::create()
+            $deleteQuery = ChildLegacyOrderProductAttributeCombinationQuery::create()
                 ->filterByPrimaryKey($this->getPrimaryKey());
             $ret = $this->preDelete($con);
             if ($ret) {
@@ -710,7 +718,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         }
 
         if ($con === null) {
-            $con = Propel::getServiceContainer()->getWriteConnection(LegacyProductAttributeValuePriceTableMap::DATABASE_NAME);
+            $con = Propel::getServiceContainer()->getWriteConnection(LegacyOrderProductAttributeCombinationTableMap::DATABASE_NAME);
         }
 
         $con->beginTransaction();
@@ -730,7 +738,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
                     $this->postUpdate($con);
                 }
                 $this->postSave($con);
-                LegacyProductAttributeValuePriceTableMap::addInstanceToPool($this);
+                LegacyOrderProductAttributeCombinationTableMap::addInstanceToPool($this);
             } else {
                 $affectedRows = 0;
             }
@@ -765,11 +773,11 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
             // method.  This object relates to these object(s) by a
             // foreign key reference.
 
-            if ($this->aProduct !== null) {
-                if ($this->aProduct->isModified() || $this->aProduct->isNew()) {
-                    $affectedRows += $this->aProduct->save($con);
+            if ($this->aOrderProduct !== null) {
+                if ($this->aOrderProduct->isModified() || $this->aOrderProduct->isNew()) {
+                    $affectedRows += $this->aOrderProduct->save($con);
                 }
-                $this->setProduct($this->aProduct);
+                $this->setOrderProduct($this->aOrderProduct);
             }
 
             if ($this->aAttributeAv !== null) {
@@ -777,13 +785,6 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
                     $affectedRows += $this->aAttributeAv->save($con);
                 }
                 $this->setAttributeAv($this->aAttributeAv);
-            }
-
-            if ($this->aCurrency !== null) {
-                if ($this->aCurrency->isModified() || $this->aCurrency->isNew()) {
-                    $affectedRows += $this->aCurrency->save($con);
-                }
-                $this->setCurrency($this->aCurrency);
             }
 
             if ($this->isNew() || $this->isModified()) {
@@ -817,23 +818,30 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         $modifiedColumns = array();
         $index = 0;
 
+        $this->modifiedColumns[LegacyOrderProductAttributeCombinationTableMap::ID] = true;
+        if (null !== $this->id) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . LegacyOrderProductAttributeCombinationTableMap::ID . ')');
+        }
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::PRODUCT_ID)) {
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ID)) {
+            $modifiedColumns[':p' . $index++]  = 'ID';
+        }
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ORDER_PRODUCT_ID)) {
+            $modifiedColumns[':p' . $index++]  = 'ORDER_PRODUCT_ID';
+        }
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::PRODUCT_ID)) {
             $modifiedColumns[':p' . $index++]  = 'PRODUCT_ID';
         }
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::ATTRIBUTE_AV_ID)) {
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ATTRIBUTE_AV_ID)) {
             $modifiedColumns[':p' . $index++]  = 'ATTRIBUTE_AV_ID';
         }
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::CURRENCY_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'CURRENCY_ID';
-        }
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::DELTA)) {
-            $modifiedColumns[':p' . $index++]  = 'DELTA';
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::QUANTITY)) {
+            $modifiedColumns[':p' . $index++]  = 'QUANTITY';
         }
 
         $sql = sprintf(
-            'INSERT INTO legacy_product_attribute_value_price (%s) VALUES (%s)',
+            'INSERT INTO legacy_order_product_attribute_combination (%s) VALUES (%s)',
             implode(', ', $modifiedColumns),
             implode(', ', array_keys($modifiedColumns))
         );
@@ -842,17 +850,20 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
+                    case 'ID':
+                        $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+                        break;
+                    case 'ORDER_PRODUCT_ID':
+                        $stmt->bindValue($identifier, $this->order_product_id, PDO::PARAM_INT);
+                        break;
                     case 'PRODUCT_ID':
                         $stmt->bindValue($identifier, $this->product_id, PDO::PARAM_INT);
                         break;
                     case 'ATTRIBUTE_AV_ID':
                         $stmt->bindValue($identifier, $this->attribute_av_id, PDO::PARAM_INT);
                         break;
-                    case 'CURRENCY_ID':
-                        $stmt->bindValue($identifier, $this->currency_id, PDO::PARAM_INT);
-                        break;
-                    case 'DELTA':
-                        $stmt->bindValue($identifier, $this->delta, PDO::PARAM_STR);
+                    case 'QUANTITY':
+                        $stmt->bindValue($identifier, $this->quantity, PDO::PARAM_INT);
                         break;
                 }
             }
@@ -861,6 +872,13 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
         }
+
+        try {
+            $pk = $con->lastInsertId();
+        } catch (Exception $e) {
+            throw new PropelException('Unable to get autoincrement id.', 0, $e);
+        }
+        $this->setId($pk);
 
         $this->setNew(false);
     }
@@ -893,7 +911,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function getByName($name, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = LegacyProductAttributeValuePriceTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LegacyOrderProductAttributeCombinationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
         $field = $this->getByPosition($pos);
 
         return $field;
@@ -910,16 +928,19 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getProductId();
+                return $this->getId();
                 break;
             case 1:
-                return $this->getAttributeAvId();
+                return $this->getOrderProductId();
                 break;
             case 2:
-                return $this->getCurrencyId();
+                return $this->getProductId();
                 break;
             case 3:
-                return $this->getDelta();
+                return $this->getAttributeAvId();
+                break;
+            case 4:
+                return $this->getQuantity();
                 break;
             default:
                 return null;
@@ -944,16 +965,17 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function toArray($keyType = TableMap::TYPE_PHPNAME, $includeLazyLoadColumns = true, $alreadyDumpedObjects = array(), $includeForeignObjects = false)
     {
-        if (isset($alreadyDumpedObjects['LegacyProductAttributeValuePrice'][serialize($this->getPrimaryKey())])) {
+        if (isset($alreadyDumpedObjects['LegacyOrderProductAttributeCombination'][$this->getPrimaryKey()])) {
             return '*RECURSION*';
         }
-        $alreadyDumpedObjects['LegacyProductAttributeValuePrice'][serialize($this->getPrimaryKey())] = true;
-        $keys = LegacyProductAttributeValuePriceTableMap::getFieldNames($keyType);
+        $alreadyDumpedObjects['LegacyOrderProductAttributeCombination'][$this->getPrimaryKey()] = true;
+        $keys = LegacyOrderProductAttributeCombinationTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getProductId(),
-            $keys[1] => $this->getAttributeAvId(),
-            $keys[2] => $this->getCurrencyId(),
-            $keys[3] => $this->getDelta(),
+            $keys[0] => $this->getId(),
+            $keys[1] => $this->getOrderProductId(),
+            $keys[2] => $this->getProductId(),
+            $keys[3] => $this->getAttributeAvId(),
+            $keys[4] => $this->getQuantity(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -961,14 +983,11 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         }
 
         if ($includeForeignObjects) {
-            if (null !== $this->aProduct) {
-                $result['Product'] = $this->aProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
+            if (null !== $this->aOrderProduct) {
+                $result['OrderProduct'] = $this->aOrderProduct->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
             if (null !== $this->aAttributeAv) {
                 $result['AttributeAv'] = $this->aAttributeAv->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
-            }
-            if (null !== $this->aCurrency) {
-                $result['Currency'] = $this->aCurrency->toArray($keyType, $includeLazyLoadColumns,  $alreadyDumpedObjects, true);
             }
         }
 
@@ -988,7 +1007,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function setByName($name, $value, $type = TableMap::TYPE_PHPNAME)
     {
-        $pos = LegacyProductAttributeValuePriceTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
+        $pos = LegacyOrderProductAttributeCombinationTableMap::translateFieldName($name, $type, TableMap::TYPE_NUM);
 
         return $this->setByPosition($pos, $value);
     }
@@ -1005,16 +1024,19 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setProductId($value);
+                $this->setId($value);
                 break;
             case 1:
-                $this->setAttributeAvId($value);
+                $this->setOrderProductId($value);
                 break;
             case 2:
-                $this->setCurrencyId($value);
+                $this->setProductId($value);
                 break;
             case 3:
-                $this->setDelta($value);
+                $this->setAttributeAvId($value);
+                break;
+            case 4:
+                $this->setQuantity($value);
                 break;
         } // switch()
     }
@@ -1038,12 +1060,13 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function fromArray($arr, $keyType = TableMap::TYPE_PHPNAME)
     {
-        $keys = LegacyProductAttributeValuePriceTableMap::getFieldNames($keyType);
+        $keys = LegacyOrderProductAttributeCombinationTableMap::getFieldNames($keyType);
 
-        if (array_key_exists($keys[0], $arr)) $this->setProductId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setAttributeAvId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setCurrencyId($arr[$keys[2]]);
-        if (array_key_exists($keys[3], $arr)) $this->setDelta($arr[$keys[3]]);
+        if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
+        if (array_key_exists($keys[1], $arr)) $this->setOrderProductId($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setProductId($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setAttributeAvId($arr[$keys[3]]);
+        if (array_key_exists($keys[4], $arr)) $this->setQuantity($arr[$keys[4]]);
     }
 
     /**
@@ -1053,12 +1076,13 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function buildCriteria()
     {
-        $criteria = new Criteria(LegacyProductAttributeValuePriceTableMap::DATABASE_NAME);
+        $criteria = new Criteria(LegacyOrderProductAttributeCombinationTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::PRODUCT_ID)) $criteria->add(LegacyProductAttributeValuePriceTableMap::PRODUCT_ID, $this->product_id);
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::ATTRIBUTE_AV_ID)) $criteria->add(LegacyProductAttributeValuePriceTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::CURRENCY_ID)) $criteria->add(LegacyProductAttributeValuePriceTableMap::CURRENCY_ID, $this->currency_id);
-        if ($this->isColumnModified(LegacyProductAttributeValuePriceTableMap::DELTA)) $criteria->add(LegacyProductAttributeValuePriceTableMap::DELTA, $this->delta);
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ID)) $criteria->add(LegacyOrderProductAttributeCombinationTableMap::ID, $this->id);
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ORDER_PRODUCT_ID)) $criteria->add(LegacyOrderProductAttributeCombinationTableMap::ORDER_PRODUCT_ID, $this->order_product_id);
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::PRODUCT_ID)) $criteria->add(LegacyOrderProductAttributeCombinationTableMap::PRODUCT_ID, $this->product_id);
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::ATTRIBUTE_AV_ID)) $criteria->add(LegacyOrderProductAttributeCombinationTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
+        if ($this->isColumnModified(LegacyOrderProductAttributeCombinationTableMap::QUANTITY)) $criteria->add(LegacyOrderProductAttributeCombinationTableMap::QUANTITY, $this->quantity);
 
         return $criteria;
     }
@@ -1073,40 +1097,30 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function buildPkeyCriteria()
     {
-        $criteria = new Criteria(LegacyProductAttributeValuePriceTableMap::DATABASE_NAME);
-        $criteria->add(LegacyProductAttributeValuePriceTableMap::PRODUCT_ID, $this->product_id);
-        $criteria->add(LegacyProductAttributeValuePriceTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
-        $criteria->add(LegacyProductAttributeValuePriceTableMap::CURRENCY_ID, $this->currency_id);
+        $criteria = new Criteria(LegacyOrderProductAttributeCombinationTableMap::DATABASE_NAME);
+        $criteria->add(LegacyOrderProductAttributeCombinationTableMap::ID, $this->id);
 
         return $criteria;
     }
 
     /**
-     * Returns the composite primary key for this object.
-     * The array elements will be in same order as specified in XML.
-     * @return array
+     * Returns the primary key for this object (row).
+     * @return   int
      */
     public function getPrimaryKey()
     {
-        $pks = array();
-        $pks[0] = $this->getProductId();
-        $pks[1] = $this->getAttributeAvId();
-        $pks[2] = $this->getCurrencyId();
-
-        return $pks;
+        return $this->getId();
     }
 
     /**
-     * Set the [composite] primary key.
+     * Generic method to set the primary key (id column).
      *
-     * @param      array $keys The elements of the composite key (order must match the order in XML file).
+     * @param       int $key Primary key.
      * @return void
      */
-    public function setPrimaryKey($keys)
+    public function setPrimaryKey($key)
     {
-        $this->setProductId($keys[0]);
-        $this->setAttributeAvId($keys[1]);
-        $this->setCurrencyId($keys[2]);
+        $this->setId($key);
     }
 
     /**
@@ -1116,7 +1130,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     public function isPrimaryKeyNull()
     {
 
-        return (null === $this->getProductId()) && (null === $this->getAttributeAvId()) && (null === $this->getCurrencyId());
+        return null === $this->getId();
     }
 
     /**
@@ -1125,19 +1139,20 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      * If desired, this method can also make copies of all associated (fkey referrers)
      * objects.
      *
-     * @param      object $copyObj An object of \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice (or compatible) type.
+     * @param      object $copyObj An object of \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination (or compatible) type.
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
      * @param      boolean $makeNew Whether to reset autoincrement PKs and make the object new.
      * @throws PropelException
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
+        $copyObj->setOrderProductId($this->getOrderProductId());
         $copyObj->setProductId($this->getProductId());
         $copyObj->setAttributeAvId($this->getAttributeAvId());
-        $copyObj->setCurrencyId($this->getCurrencyId());
-        $copyObj->setDelta($this->getDelta());
+        $copyObj->setQuantity($this->getQuantity());
         if ($makeNew) {
             $copyObj->setNew(true);
+            $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1150,7 +1165,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      * objects.
      *
      * @param      boolean $deepCopy Whether to also copy all rows that refer (by fkey) to the current row.
-     * @return                 \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice Clone of current object.
+     * @return                 \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination Clone of current object.
      * @throws PropelException
      */
     public function copy($deepCopy = false)
@@ -1164,26 +1179,26 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildProduct object.
+     * Declares an association between this object and a ChildOrderProduct object.
      *
-     * @param                  ChildProduct $v
-     * @return                 \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
+     * @param                  ChildOrderProduct $v
+     * @return                 \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      * @throws PropelException
      */
-    public function setProduct(ChildProduct $v = null)
+    public function setOrderProduct(ChildOrderProduct $v = null)
     {
         if ($v === null) {
-            $this->setProductId(NULL);
+            $this->setOrderProductId(NULL);
         } else {
-            $this->setProductId($v->getId());
+            $this->setOrderProductId($v->getId());
         }
 
-        $this->aProduct = $v;
+        $this->aOrderProduct = $v;
 
         // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildProduct object, it will not be re-added.
+        // If this object has already been added to the ChildOrderProduct object, it will not be re-added.
         if ($v !== null) {
-            $v->addLegacyProductAttributeValuePrice($this);
+            $v->addLegacyOrderProductAttributeCombination($this);
         }
 
 
@@ -1192,33 +1207,33 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
 
 
     /**
-     * Get the associated ChildProduct object
+     * Get the associated ChildOrderProduct object
      *
      * @param      ConnectionInterface $con Optional Connection object.
-     * @return                 ChildProduct The associated ChildProduct object.
+     * @return                 ChildOrderProduct The associated ChildOrderProduct object.
      * @throws PropelException
      */
-    public function getProduct(ConnectionInterface $con = null)
+    public function getOrderProduct(ConnectionInterface $con = null)
     {
-        if ($this->aProduct === null && ($this->product_id !== null)) {
-            $this->aProduct = ProductQuery::create()->findPk($this->product_id, $con);
+        if ($this->aOrderProduct === null && ($this->order_product_id !== null)) {
+            $this->aOrderProduct = OrderProductQuery::create()->findPk($this->order_product_id, $con);
             /* The following can be used additionally to
                 guarantee the related object contains a reference
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aProduct->addLegacyProductAttributeValuePrices($this);
+                $this->aOrderProduct->addLegacyOrderProductAttributeCombinations($this);
              */
         }
 
-        return $this->aProduct;
+        return $this->aOrderProduct;
     }
 
     /**
      * Declares an association between this object and a ChildAttributeAv object.
      *
      * @param                  ChildAttributeAv $v
-     * @return                 \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
+     * @return                 \LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination The current object (for fluent API support)
      * @throws PropelException
      */
     public function setAttributeAv(ChildAttributeAv $v = null)
@@ -1234,7 +1249,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         // Add binding for other direction of this n:n relationship.
         // If this object has already been added to the ChildAttributeAv object, it will not be re-added.
         if ($v !== null) {
-            $v->addLegacyProductAttributeValuePrice($this);
+            $v->addLegacyOrderProductAttributeCombination($this);
         }
 
 
@@ -1258,7 +1273,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
                 to this object.  This level of coupling may, however, be
                 undesirable since it could result in an only partially populated collection
                 in the referenced object.
-                $this->aAttributeAv->addLegacyProductAttributeValuePrices($this);
+                $this->aAttributeAv->addLegacyOrderProductAttributeCombinations($this);
              */
         }
 
@@ -1266,68 +1281,17 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
     }
 
     /**
-     * Declares an association between this object and a ChildCurrency object.
-     *
-     * @param                  ChildCurrency $v
-     * @return                 \LegacyProductAttributes\Model\LegacyProductAttributeValuePrice The current object (for fluent API support)
-     * @throws PropelException
-     */
-    public function setCurrency(ChildCurrency $v = null)
-    {
-        if ($v === null) {
-            $this->setCurrencyId(NULL);
-        } else {
-            $this->setCurrencyId($v->getId());
-        }
-
-        $this->aCurrency = $v;
-
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildCurrency object, it will not be re-added.
-        if ($v !== null) {
-            $v->addLegacyProductAttributeValuePrice($this);
-        }
-
-
-        return $this;
-    }
-
-
-    /**
-     * Get the associated ChildCurrency object
-     *
-     * @param      ConnectionInterface $con Optional Connection object.
-     * @return                 ChildCurrency The associated ChildCurrency object.
-     * @throws PropelException
-     */
-    public function getCurrency(ConnectionInterface $con = null)
-    {
-        if ($this->aCurrency === null && ($this->currency_id !== null)) {
-            $this->aCurrency = CurrencyQuery::create()->findPk($this->currency_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aCurrency->addLegacyProductAttributeValuePrices($this);
-             */
-        }
-
-        return $this->aCurrency;
-    }
-
-    /**
      * Clears the current object and sets all attributes to their default values
      */
     public function clear()
     {
+        $this->id = null;
+        $this->order_product_id = null;
         $this->product_id = null;
         $this->attribute_av_id = null;
-        $this->currency_id = null;
-        $this->delta = null;
+        $this->quantity = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();
-        $this->applyDefaultValues();
         $this->resetModified();
         $this->setNew(true);
         $this->setDeleted(false);
@@ -1347,9 +1311,8 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
         if ($deep) {
         } // if ($deep)
 
-        $this->aProduct = null;
+        $this->aOrderProduct = null;
         $this->aAttributeAv = null;
-        $this->aCurrency = null;
     }
 
     /**
@@ -1359,7 +1322,7 @@ abstract class LegacyProductAttributeValuePrice implements ActiveRecordInterface
      */
     public function __toString()
     {
-        return (string) $this->exportTo(LegacyProductAttributeValuePriceTableMap::DEFAULT_STRING_FORMAT);
+        return (string) $this->exportTo(LegacyOrderProductAttributeCombinationTableMap::DEFAULT_STRING_FORMAT);
     }
 
     /**
