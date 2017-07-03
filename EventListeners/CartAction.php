@@ -10,6 +10,7 @@ use LegacyProductAttributes\Model\LegacyCartItemAttributeCombinationQuery;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Thelia\Action\Cart;
 use Thelia\Core\Event\Cart\CartEvent;
+use Thelia\Core\Event\Cart\CartItemDuplicationItem;
 use Thelia\Core\Event\TheliaEvents;
 use Thelia\Model\Attribute;
 use Thelia\Model\Cart as CartModel;
@@ -30,15 +31,6 @@ class CartAction extends Cart
      */
     protected $legacyProductAttributes = [];
 
-    public static function getSubscribedEvents()
-    {
-        return [
-            // must run before the Thelia cart action
-            TheliaEvents::CART_ADDITEM => ['addItem', 192],
-            TheliaEvents::CART_FINDITEM => ['findCartItem', 192],
-        ];
-    }
-
     /**
      * Manage adding an item to the cart when our legacy product attributes are used.
      *
@@ -50,10 +42,6 @@ class CartAction extends Cart
 
         // call the parent method, but using our redefined sub-methods
         parent::addItem($event, $eventName, $dispatcher);
-
-        // prevent the parent event from adding the item
-        $event->setNewness(false);
-        $event->setAppend(false);
     }
 
     /**
@@ -78,7 +66,7 @@ class CartAction extends Cart
             }
         }
     }
-    
+
     /**
      * Find a specific record in CartItem table using the current CartEvent
      *
@@ -92,32 +80,31 @@ class CartAction extends Cart
             // Do something if legacy attributes are defined
             if (!empty($this->legacyProductAttributes)) {
                 $query = CartItemQuery::create();
-        
+
                 $query
                     ->filterByCartId($event->getCart()->getId())
                     ->filterByProductId($event->getProduct())
                     ->filterByProductSaleElementsId($event->getProductSaleElementsId());
-        
+
                 /** @var CartItem $cartItem */
                 foreach ($query->find() as $cartItem) {
                     $legacyCartItemAttributeCombinations = LegacyCartItemAttributeCombinationQuery::create()
                         ->findByCartItemId($cartItem->getId());
-            
+
                     $cartItemLegacyProductAttributes = [];
                     /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
                     foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
                         $cartItemLegacyProductAttributes[$legacyCartItemAttributeCombination->getAttributeId()]
                             = $legacyCartItemAttributeCombination->getAttributeAvId();
                     }
-            
+
                     if ($cartItemLegacyProductAttributes == $this->legacyProductAttributes) {
                         $event->setCartItem($cartItem);
                         break;
                     }
                 }
-                
-                // Prevent the Cart Action to find something else in the cart
-                $event->stopPropagation();
+            } else {
+                parent::findCartItem($event);
             }
         }
     }
@@ -136,6 +123,10 @@ class CartAction extends Cart
         $quantity,
         ProductPriceTools $productPrices
     ) {
+        if (empty($this->legacyProductAttributes)) {
+            return parent::doAddItem($dispatcher, $cart, $productId, $productSaleElements, $quantity, $productPrices);
+        }
+
         // get the adjusted price
         $productGetPricesEvent = (new ProductGetPricesEvent($productId))
             ->setCurrencyId($cart->getCurrencyId())
@@ -143,7 +134,7 @@ class CartAction extends Cart
             ->setLegacyProductAttributes($this->legacyProductAttributes);
 
         $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
-        
+
         if (null !== $productGetPricesEvent->getPrices()) {
             $productPrices = $productGetPricesEvent->getPrices();
         }
@@ -160,5 +151,67 @@ class CartAction extends Cart
         }
 
         return $cartItem;
+    }
+
+    /**
+     * Manage cart iteml duplication.
+     *
+     * @param CartItemDuplicationItem $event
+     * @param $eventName
+     * @param EventDispatcherInterface $dispatcher
+     */
+    public function cartItemDuplication(CartItemDuplicationItem $event, $eventName, EventDispatcherInterface $dispatcher)
+    {
+        $oldCartItem = $event->getOldItem();
+        $newCartItem = $event->getNewItem();
+
+        $legacyAttributeCombinations =
+            LegacyCartItemAttributeCombinationQuery::create()->findByCartItemId($oldCartItem->getId());
+
+        $legacyProductAttributes = [];
+
+        /** @var  LegacyCartItemAttributeCombination $legacyAttributeCombination */
+        foreach ($legacyAttributeCombinations as $legacyAttributeCombination) {
+            // Create CartItemAttributeCombination for the new cart item.
+            (new LegacyCartItemAttributeCombination())
+                ->setCartItemId($event->getNewItem()->getId())
+                ->setAttributeId($legacyAttributeCombination->getAttributeId())
+                ->setAttributeAvId($legacyAttributeCombination->getAttributeAvId())
+                ->save();
+
+            $legacyProductAttributes[$legacyAttributeCombination->getAttributeId()] = $legacyAttributeCombination->getAttributeAvId();
+        }
+
+        // Adjust cart item price
+        $productPrices = new ProductPriceTools(
+            $newCartItem->getPrice(),
+            $newCartItem->getPromoPrice()
+        );
+
+        $productGetPricesEvent = (new ProductGetPricesEvent($event->getOldItem()->getProductId()))
+            ->setCurrencyId($newCartItem->getCart()->getCurrencyId())
+            ->setBasePrices($productPrices)
+            ->setLegacyProductAttributes($legacyProductAttributes);
+
+        $dispatcher->dispatch(LegacyProductAttributesEvents::PRODUCT_GET_PRICES, $productGetPricesEvent);
+
+        if (null !== $productGetPricesEvent->getPrices()) {
+            $productPrices = $productGetPricesEvent->getPrices();
+
+            $newCartItem
+                ->setPrice($productPrices->getPrice())
+                ->setPromoPrice($productPrices->getPromoPrice())
+                ->save();
+            ;
+        }
+    }
+
+    public static function getSubscribedEvents()
+    {
+        $events = parent::getSubscribedEvents();
+
+        $events[TheliaEvents::CART_ITEM_DUPLICATE] = ['cartItemDuplication', 128];
+
+        return $events;
     }
 }

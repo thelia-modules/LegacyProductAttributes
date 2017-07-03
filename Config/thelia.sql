@@ -70,10 +70,12 @@ DROP TABLE IF EXISTS `legacy_cart_item_attribute_combination`;
 
 CREATE TABLE `legacy_cart_item_attribute_combination`
 (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `cart_item_id` INTEGER NOT NULL,
     `attribute_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
-    PRIMARY KEY (`cart_item_id`,`attribute_id`),
+    PRIMARY KEY (`id`,`cart_item_id`,`attribute_id`),
+    INDEX `legacy_cart_item_attribute_combination_FI_1` (`cart_item_id`),
     INDEX `legacy_cart_item_attribute_combination_FI_2` (`attribute_id`),
     INDEX `legacy_cart_item_attribute_combination_FI_3` (`attribute_av_id`),
     CONSTRAINT `legacy_cart_item_attribute_combination_FK_1`
@@ -101,10 +103,12 @@ DROP TABLE IF EXISTS `legacy_order_product_attribute_combination`;
 
 CREATE TABLE `legacy_order_product_attribute_combination`
 (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
     `order_product_id` INTEGER NOT NULL,
     `product_id` INTEGER NOT NULL,
     `attribute_av_id` INTEGER NOT NULL,
     `quantity` INTEGER NOT NULL,
+    PRIMARY KEY (`id`),
     INDEX `legacy_order_product_attribute_combination_I_1` (`order_product_id`),
     INDEX `legacy_order_product_attribute_combination_FI_2` (`attribute_av_id`),
     CONSTRAINT `legacy_order_product_attribute_combination_FK_1`

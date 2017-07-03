@@ -58,7 +58,7 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     /**
      * The total number of columns
      */
-    const NUM_COLUMNS = 3;
+    const NUM_COLUMNS = 4;
 
     /**
      * The number of lazy-loaded columns
@@ -68,7 +68,12 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     /**
      * The number of columns to hydrate (NUM_COLUMNS - NUM_LAZY_LOAD_COLUMNS)
      */
-    const NUM_HYDRATE_COLUMNS = 3;
+    const NUM_HYDRATE_COLUMNS = 4;
+
+    /**
+     * the column name for the ID field
+     */
+    const ID = 'legacy_cart_item_attribute_combination.ID';
 
     /**
      * the column name for the CART_ITEM_ID field
@@ -97,12 +102,12 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('CartItemId', 'AttributeId', 'AttributeAvId', ),
-        self::TYPE_STUDLYPHPNAME => array('cartItemId', 'attributeId', 'attributeAvId', ),
-        self::TYPE_COLNAME       => array(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID, ),
-        self::TYPE_RAW_COLNAME   => array('CART_ITEM_ID', 'ATTRIBUTE_ID', 'ATTRIBUTE_AV_ID', ),
-        self::TYPE_FIELDNAME     => array('cart_item_id', 'attribute_id', 'attribute_av_id', ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id', 'CartItemId', 'AttributeId', 'AttributeAvId', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'cartItemId', 'attributeId', 'attributeAvId', ),
+        self::TYPE_COLNAME       => array(LegacyCartItemAttributeCombinationTableMap::ID, LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'CART_ITEM_ID', 'ATTRIBUTE_ID', 'ATTRIBUTE_AV_ID', ),
+        self::TYPE_FIELDNAME     => array('id', 'cart_item_id', 'attribute_id', 'attribute_av_id', ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -112,12 +117,12 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('CartItemId' => 0, 'AttributeId' => 1, 'AttributeAvId' => 2, ),
-        self::TYPE_STUDLYPHPNAME => array('cartItemId' => 0, 'attributeId' => 1, 'attributeAvId' => 2, ),
-        self::TYPE_COLNAME       => array(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID => 0, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID => 1, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID => 2, ),
-        self::TYPE_RAW_COLNAME   => array('CART_ITEM_ID' => 0, 'ATTRIBUTE_ID' => 1, 'ATTRIBUTE_AV_ID' => 2, ),
-        self::TYPE_FIELDNAME     => array('cart_item_id' => 0, 'attribute_id' => 1, 'attribute_av_id' => 2, ),
-        self::TYPE_NUM           => array(0, 1, 2, )
+        self::TYPE_PHPNAME       => array('Id' => 0, 'CartItemId' => 1, 'AttributeId' => 2, 'AttributeAvId' => 3, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'cartItemId' => 1, 'attributeId' => 2, 'attributeAvId' => 3, ),
+        self::TYPE_COLNAME       => array(LegacyCartItemAttributeCombinationTableMap::ID => 0, LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID => 1, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID => 2, LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID => 3, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'CART_ITEM_ID' => 1, 'ATTRIBUTE_ID' => 2, 'ATTRIBUTE_AV_ID' => 3, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'cart_item_id' => 1, 'attribute_id' => 2, 'attribute_av_id' => 3, ),
+        self::TYPE_NUM           => array(0, 1, 2, 3, )
     );
 
     /**
@@ -134,8 +139,9 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
         $this->setPhpName('LegacyCartItemAttributeCombination');
         $this->setClassName('\\LegacyProductAttributes\\Model\\LegacyCartItemAttributeCombination');
         $this->setPackage('LegacyProductAttributes.Model');
-        $this->setUseIdGenerator(false);
+        $this->setUseIdGenerator(true);
         // columns
+        $this->addPrimaryKey('ID', 'Id', 'INTEGER', true, null, null);
         $this->addForeignPrimaryKey('CART_ITEM_ID', 'CartItemId', 'INTEGER' , 'cart_item', 'ID', true, null, null);
         $this->addForeignPrimaryKey('ATTRIBUTE_ID', 'AttributeId', 'INTEGER' , 'attribute', 'ID', true, null, null);
         $this->addForeignKey('ATTRIBUTE_AV_ID', 'AttributeAvId', 'INTEGER', 'attribute_av', 'ID', true, null, null);
@@ -166,7 +172,7 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled()) {
             if (null === $key) {
-                $key = serialize(array((string) $obj->getCartItemId(), (string) $obj->getAttributeId()));
+                $key = serialize(array((string) $obj->getId(), (string) $obj->getCartItemId(), (string) $obj->getAttributeId()));
             } // if key === null
             self::$instances[$key] = $obj;
         }
@@ -186,11 +192,11 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     {
         if (Propel::isInstancePoolingEnabled() && null !== $value) {
             if (is_object($value) && $value instanceof \LegacyProductAttributes\Model\LegacyCartItemAttributeCombination) {
-                $key = serialize(array((string) $value->getCartItemId(), (string) $value->getAttributeId()));
+                $key = serialize(array((string) $value->getId(), (string) $value->getCartItemId(), (string) $value->getAttributeId()));
 
-            } elseif (is_array($value) && count($value) === 2) {
+            } elseif (is_array($value) && count($value) === 3) {
                 // assume we've been passed a primary key";
-                $key = serialize(array((string) $value[0], (string) $value[1]));
+                $key = serialize(array((string) $value[0], (string) $value[1], (string) $value[2]));
             } elseif ($value instanceof Criteria) {
                 self::$instances = [];
 
@@ -218,11 +224,11 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
         // If the PK cannot be derived from the row, return NULL.
-        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)] === null && $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)] === null) {
             return null;
         }
 
-        return serialize(array((string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)], (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)]));
+        return serialize(array((string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)], (string) $row[TableMap::TYPE_NUM == $indexType ? 1 + $offset : static::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)], (string) $row[TableMap::TYPE_NUM == $indexType ? 2 + $offset : static::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)]));
     }
 
     /**
@@ -338,10 +344,12 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
+            $criteria->addSelectColumn(LegacyCartItemAttributeCombinationTableMap::ID);
             $criteria->addSelectColumn(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID);
             $criteria->addSelectColumn(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID);
             $criteria->addSelectColumn(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID);
         } else {
+            $criteria->addSelectColumn($alias . '.ID');
             $criteria->addSelectColumn($alias . '.CART_ITEM_ID');
             $criteria->addSelectColumn($alias . '.ATTRIBUTE_ID');
             $criteria->addSelectColumn($alias . '.ATTRIBUTE_AV_ID');
@@ -403,8 +411,9 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
                 $values = array($values);
             }
             foreach ($values as $value) {
-                $criterion = $criteria->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $value[0]);
-                $criterion->addAnd($criteria->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $value[1]));
+                $criterion = $criteria->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ID, $value[0]);
+                $criterion->addAnd($criteria->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $value[1]));
+                $criterion->addAnd($criteria->getNewCriterion(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $value[2]));
                 $criteria->addOr($criterion);
             }
         }
@@ -450,6 +459,10 @@ class LegacyCartItemAttributeCombinationTableMap extends TableMap
             $criteria = clone $criteria; // rename for clarity
         } else {
             $criteria = $criteria->buildCriteria(); // build Criteria from LegacyCartItemAttributeCombination object
+        }
+
+        if ($criteria->containsKey(LegacyCartItemAttributeCombinationTableMap::ID) && $criteria->keyContainsValue(LegacyCartItemAttributeCombinationTableMap::ID) ) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key ('.LegacyCartItemAttributeCombinationTableMap::ID.')');
         }
 
 

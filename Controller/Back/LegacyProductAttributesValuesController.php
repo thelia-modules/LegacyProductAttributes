@@ -2,6 +2,8 @@
 
 namespace LegacyProductAttributes\Controller\Back;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\UpdateStockEvent;
 use LegacyProductAttributes\Model\LegacyProductAttributeValue;
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePrice;
 use LegacyProductAttributes\Model\LegacyProductAttributeValuePriceQuery;
@@ -17,6 +19,7 @@ use Thelia\Form\Exception\FormValidationException;
 use Thelia\Model\AttributeCombinationQuery;
 use Thelia\Model\Currency;
 use Thelia\Model\Map\ProductSaleElementsTableMap;
+use Thelia\Model\ProductQuery;
 use Thelia\Model\ProductSaleElementsQuery;
 use Thelia\Tools\URL;
 
@@ -25,6 +28,24 @@ use Thelia\Tools\URL;
  */
 class LegacyProductAttributesValuesController extends BaseAdminController
 {
+    public function syncAction()
+    {
+        $products = ProductQuery::create()->find();
+        
+        foreach($products as $product) {
+            echo "Update ".$product->getId()."<br>";
+            
+            $this->getDispatcher()->dispatch(
+                LegacyProductAttributesEvents::UPDATE_PRODUCT_STOCK,
+                new UpdateStockEvent($product->getId())
+            );
+        }
+        
+        echo "Sync done";
+        
+        exit;
+    }
+    
     public function clearProductCombinationsAction($productId)
     {
         // Select all PSE except the default one
@@ -104,6 +125,11 @@ class LegacyProductAttributesValuesController extends BaseAdminController
                 $formData['legacy_product_attribute_value_stock'][$attributeAvId]
             );
         }
+    
+        $this->getDispatcher()->dispatch(
+            LegacyProductAttributesEvents::UPDATE_PRODUCT_STOCK,
+            new UpdateStockEvent($formData['product_id'])
+        );
     }
 
     /**

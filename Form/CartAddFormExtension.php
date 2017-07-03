@@ -3,7 +3,6 @@
 namespace LegacyProductAttributes\Form;
 
 use LegacyProductAttributes\LegacyProductAttributes;
-use LegacyProductAttributes\Model\LegacyProductAttributeValueQuery;
 use LegacyProductAttributes\Model\Map\LegacyProductAttributeValueTableMap;
 use Propel\Runtime\ActiveQuery\Criteria;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -58,10 +57,10 @@ class CartAddFormExtension implements EventSubscriberInterface
     {
         /** @var Request $request */
         $request = $this->requestStack->getCurrentRequest();
-        
+
         // Should we check available stock ?
         $checkAvailableStock = ConfigQuery::checkAvailableStock();
-        
+
         $sessionLocale = null;
         /** @var Session $session */
         $session = $request->getSession();
@@ -88,25 +87,26 @@ class CartAddFormExtension implements EventSubscriberInterface
                     ->add(LegacyProductAttributeValueTableMap::VISIBLE, true)
                     ->add(LegacyProductAttributeValueTableMap::PRODUCT_ID, $product->getId())
              ;
-            
+
             // Hide items without stock
             if ($checkAvailableStock) {
                 $attributeValuesQuery
                     ->add(LegacyProductAttributeValueTableMap::STOCK, 0, Criteria::GREATER_THAN);
             }
-            
+
             $attributeValues = $attributeValuesQuery
+                ->orderByPosition()
                 ->findByAttributeId($productAttribute->getId());
-            
+
             $choices = [];
-            
+
             if (true === $withOptions = $attributeValues->count() > 0) {
                 /** @var AttributeAv $attributeValue */
                 foreach ($attributeValues as $attributeValue) {
                     if ($sessionLocale !== null) {
                         $attributeValue->setLocale($sessionLocale);
                     }
-        
+
                     $choices[$attributeValue->getId()] = $attributeValue->getTitle();
                 }
             } else {

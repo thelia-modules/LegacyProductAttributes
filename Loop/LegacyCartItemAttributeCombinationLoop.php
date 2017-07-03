@@ -14,7 +14,7 @@ use Thelia\Model\Map\AttributeTableMap;
  * Loop on legacy cart item attribute combinations.
  * Uses the same output parsing as the attribute combination Thelia loop.
  */
-class LegacyCartItemAttributeCombinationLoop extends AttributeCombination implements PropelSearchLoopInterface
+class LegacyCartItemAttributeCombinationLoop extends AttributeCombination
 {
     protected $timestampable = false;
 

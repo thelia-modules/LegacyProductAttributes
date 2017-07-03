@@ -58,6 +58,12 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     protected $virtualColumns = array();
 
     /**
+     * The value for the id field.
+     * @var        int
+     */
+    protected $id;
+
+    /**
      * The value for the cart_item_id field.
      * @var        int
      */
@@ -357,6 +363,17 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     }
 
     /**
+     * Get the [id] column value.
+     *
+     * @return   int
+     */
+    public function getId()
+    {
+
+        return $this->id;
+    }
+
+    /**
      * Get the [cart_item_id] column value.
      *
      * @return   int
@@ -388,6 +405,27 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
 
         return $this->attribute_av_id;
     }
+
+    /**
+     * Set the value of [id] column.
+     *
+     * @param      int $v new value
+     * @return   \LegacyProductAttributes\Model\LegacyCartItemAttributeCombination The current object (for fluent API support)
+     */
+    public function setId($v)
+    {
+        if ($v !== null) {
+            $v = (int) $v;
+        }
+
+        if ($this->id !== $v) {
+            $this->id = $v;
+            $this->modifiedColumns[LegacyCartItemAttributeCombinationTableMap::ID] = true;
+        }
+
+
+        return $this;
+    } // setId()
 
     /**
      * Set the value of [cart_item_id] column.
@@ -501,13 +539,16 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->id = (null !== $col) ? (int) $col : null;
+
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('CartItemId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->cart_item_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('AttributeId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->attribute_id = (null !== $col) ? (int) $col : null;
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 2 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 3 + $startcol : LegacyCartItemAttributeCombinationTableMap::translateFieldName('AttributeAvId', TableMap::TYPE_PHPNAME, $indexType)];
             $this->attribute_av_id = (null !== $col) ? (int) $col : null;
             $this->resetModified();
 
@@ -517,7 +558,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
                 $this->ensureConsistency();
             }
 
-            return $startcol + 3; // 3 = LegacyCartItemAttributeCombinationTableMap::NUM_HYDRATE_COLUMNS.
+            return $startcol + 4; // 4 = LegacyCartItemAttributeCombinationTableMap::NUM_HYDRATE_COLUMNS.
 
         } catch (Exception $e) {
             throw new PropelException("Error populating \LegacyProductAttributes\Model\LegacyCartItemAttributeCombination object", 0, $e);
@@ -758,8 +799,15 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
         $modifiedColumns = array();
         $index = 0;
 
+        $this->modifiedColumns[LegacyCartItemAttributeCombinationTableMap::ID] = true;
+        if (null !== $this->id) {
+            throw new PropelException('Cannot insert a value for auto-increment primary key (' . LegacyCartItemAttributeCombinationTableMap::ID . ')');
+        }
 
          // check the columns in natural order for more readable SQL queries
+        if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::ID)) {
+            $modifiedColumns[':p' . $index++]  = 'ID';
+        }
         if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID)) {
             $modifiedColumns[':p' . $index++]  = 'CART_ITEM_ID';
         }
@@ -780,6 +828,9 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
+                    case 'ID':
+                        $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
+                        break;
                     case 'CART_ITEM_ID':
                         $stmt->bindValue($identifier, $this->cart_item_id, PDO::PARAM_INT);
                         break;
@@ -796,6 +847,13 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
             Propel::log($e->getMessage(), Propel::LOG_ERR);
             throw new PropelException(sprintf('Unable to execute INSERT statement [%s]', $sql), 0, $e);
         }
+
+        try {
+            $pk = $con->lastInsertId();
+        } catch (Exception $e) {
+            throw new PropelException('Unable to get autoincrement id.', 0, $e);
+        }
+        $this->setId($pk);
 
         $this->setNew(false);
     }
@@ -845,12 +903,15 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     {
         switch ($pos) {
             case 0:
-                return $this->getCartItemId();
+                return $this->getId();
                 break;
             case 1:
-                return $this->getAttributeId();
+                return $this->getCartItemId();
                 break;
             case 2:
+                return $this->getAttributeId();
+                break;
+            case 3:
                 return $this->getAttributeAvId();
                 break;
             default:
@@ -882,9 +943,10 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
         $alreadyDumpedObjects['LegacyCartItemAttributeCombination'][serialize($this->getPrimaryKey())] = true;
         $keys = LegacyCartItemAttributeCombinationTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getCartItemId(),
-            $keys[1] => $this->getAttributeId(),
-            $keys[2] => $this->getAttributeAvId(),
+            $keys[0] => $this->getId(),
+            $keys[1] => $this->getCartItemId(),
+            $keys[2] => $this->getAttributeId(),
+            $keys[3] => $this->getAttributeAvId(),
         );
         $virtualColumns = $this->virtualColumns;
         foreach ($virtualColumns as $key => $virtualColumn) {
@@ -936,12 +998,15 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     {
         switch ($pos) {
             case 0:
-                $this->setCartItemId($value);
+                $this->setId($value);
                 break;
             case 1:
-                $this->setAttributeId($value);
+                $this->setCartItemId($value);
                 break;
             case 2:
+                $this->setAttributeId($value);
+                break;
+            case 3:
                 $this->setAttributeAvId($value);
                 break;
         } // switch()
@@ -968,9 +1033,10 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     {
         $keys = LegacyCartItemAttributeCombinationTableMap::getFieldNames($keyType);
 
-        if (array_key_exists($keys[0], $arr)) $this->setCartItemId($arr[$keys[0]]);
-        if (array_key_exists($keys[1], $arr)) $this->setAttributeId($arr[$keys[1]]);
-        if (array_key_exists($keys[2], $arr)) $this->setAttributeAvId($arr[$keys[2]]);
+        if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
+        if (array_key_exists($keys[1], $arr)) $this->setCartItemId($arr[$keys[1]]);
+        if (array_key_exists($keys[2], $arr)) $this->setAttributeId($arr[$keys[2]]);
+        if (array_key_exists($keys[3], $arr)) $this->setAttributeAvId($arr[$keys[3]]);
     }
 
     /**
@@ -982,6 +1048,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     {
         $criteria = new Criteria(LegacyCartItemAttributeCombinationTableMap::DATABASE_NAME);
 
+        if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::ID)) $criteria->add(LegacyCartItemAttributeCombinationTableMap::ID, $this->id);
         if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID)) $criteria->add(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $this->cart_item_id);
         if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID)) $criteria->add(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $this->attribute_id);
         if ($this->isColumnModified(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID)) $criteria->add(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_AV_ID, $this->attribute_av_id);
@@ -1000,6 +1067,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     public function buildPkeyCriteria()
     {
         $criteria = new Criteria(LegacyCartItemAttributeCombinationTableMap::DATABASE_NAME);
+        $criteria->add(LegacyCartItemAttributeCombinationTableMap::ID, $this->id);
         $criteria->add(LegacyCartItemAttributeCombinationTableMap::CART_ITEM_ID, $this->cart_item_id);
         $criteria->add(LegacyCartItemAttributeCombinationTableMap::ATTRIBUTE_ID, $this->attribute_id);
 
@@ -1014,8 +1082,9 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     public function getPrimaryKey()
     {
         $pks = array();
-        $pks[0] = $this->getCartItemId();
-        $pks[1] = $this->getAttributeId();
+        $pks[0] = $this->getId();
+        $pks[1] = $this->getCartItemId();
+        $pks[2] = $this->getAttributeId();
 
         return $pks;
     }
@@ -1028,8 +1097,9 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
      */
     public function setPrimaryKey($keys)
     {
-        $this->setCartItemId($keys[0]);
-        $this->setAttributeId($keys[1]);
+        $this->setId($keys[0]);
+        $this->setCartItemId($keys[1]);
+        $this->setAttributeId($keys[2]);
     }
 
     /**
@@ -1039,7 +1109,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
     public function isPrimaryKeyNull()
     {
 
-        return (null === $this->getCartItemId()) && (null === $this->getAttributeId());
+        return (null === $this->getId()) && (null === $this->getCartItemId()) && (null === $this->getAttributeId());
     }
 
     /**
@@ -1060,6 +1130,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
         $copyObj->setAttributeAvId($this->getAttributeAvId());
         if ($makeNew) {
             $copyObj->setNew(true);
+            $copyObj->setId(NULL); // this is a auto-increment column, so set to default value
         }
     }
 
@@ -1243,6 +1314,7 @@ abstract class LegacyCartItemAttributeCombination implements ActiveRecordInterfa
      */
     public function clear()
     {
+        $this->id = null;
         $this->cart_item_id = null;
         $this->attribute_id = null;
         $this->attribute_av_id = null;

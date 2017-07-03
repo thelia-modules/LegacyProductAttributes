@@ -4,27 +4,34 @@
 
     function initFormProductDetails() {
         var $formProductDetails = $('#form-product-details');
-
+        
         if ($formProductDetails.length > 0) {
             var productId = $formProductDetails.find('input[name="product_id"]').val();
-            var $insert = $('.form-product-details-legacy-product-attributes[data-product="'+productId+'"]');
+            var $insert = $('.form-product-details-legacy-product-attributes[data-product="' + productId + '"]');
     
             if ($insert.length) {
-                $formProductDetails
-                    .find('fieldset:eq(-0)')
-                    .before($insert.html());
-    
-                $('#pse-options').hide();
+                $('#pse-options')
+                    .before($insert.html())
+                    .hide();
             }
     
             var $psePrice = $('#pse-price');
-            var $psePriceOld = $('#pse-price-old');
+            var $pseUntaxedPrice = $('#pse-untaxed-price');
     
-            setProductPrices($formProductDetails, $psePrice, $psePriceOld);
+            var $psePriceOld = $('#pse-price-old');
+            var $pseUntaxedPriceOld = $('#pse-untaxed-price-old');
+    
+            setProductPrices($formProductDetails, $psePrice, $pseUntaxedPrice, $psePriceOld, $pseUntaxedPriceOld);
             setProductPseName();
-            
+    
+            // Compatibilité avec bootsrap-select
+            var className = ".pse-option.bootstrap-select";
+            if ($(className).length == 0) {
+                className = ".pse-option";
+            }
+    
             $formProductDetails.on('change', '.pse-option', function () {
-                setProductPrices($formProductDetails, $psePrice, $psePriceOld);
+                setProductPrices($formProductDetails, $psePrice, $pseUntaxedPrice, $psePriceOld, $pseUntaxedPriceOld);
                 setProductPseName();
             });
         }
@@ -44,7 +51,7 @@
         });
     });
 
-    function setProductPrices($formProductDetails, $promo, $old) {
+    function setProductPrices($formProductDetails, $promo, $promo_untaxed, $old, $old_untaxed) {
         $
             .ajax({
                 type: 'POST',
@@ -54,14 +61,22 @@
             .done(function (data) {
                 if (typeof data.promo_price != 'undefined') {
                     $promo.html(data.promo_price);
+                    $promo_untaxed.html(data.promo_untaxed_price);
+                    
                     $old.html(data.price);
+                    $old_untaxed.html(data.untaxed_price);
                 } else {
                     $promo.html(data.price);
+                    $promo_untaxed.html(data.untaxed_price);
+                    $old.html('');
+                    $old_untaxed.html('');
                 }
             })
             .fail(function () {
                 $promo.html('-');
                 $old.html('-');
+                $promo_untaxed.html('-');
+                $old_untaxed.html('-');
             });
     }
 
@@ -112,7 +127,9 @@
             setProductPrices(
                 $formProductDetails,
                 $bootbox.find('.special-price').find('.price'),
-                $bootbox.find('.old-price').find('.price')
+                $bootbox.find('.special-untexed-price').find('.price'),
+                $bootbox.find('.old-price').find('.price'),
+                $bootbox.find('.old-untaxed-price').find('.price')
             );
             setBootboxProductOptions();
         }

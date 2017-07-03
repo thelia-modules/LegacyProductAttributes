@@ -7,6 +7,8 @@
     <loops>
         <loop name="legacy_cart_item_attribute_combination"
               class="LegacyProductAttributes\Loop\LegacyCartItemAttributeCombinationLoop"/>
+        <loop name="legacy_product_attribute_value"
+              class="LegacyProductAttributes\Loop\LegacyProductAttributeValuesLoop"/>
     </loops>
 
     <forms>
@@ -41,9 +43,10 @@
             <argument type="service" id="thelia.translator" />
         </service>
 
-        <service id="legacy_product_attributes.listener.cart"
-                 parent="thelia.action.cart"
+        <service id="thelia.action.cart"
                  class="LegacyProductAttributes\EventListeners\CartAction">
+            <argument type="service" id="request_stack"/>
+            <argument type="service" id="thelia.token_provider"/>
             <tag name="kernel.event_subscriber"/>
         </service>
 

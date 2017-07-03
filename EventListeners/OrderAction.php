@@ -2,6 +2,8 @@
 
 namespace LegacyProductAttributes\EventListeners;
 
+use LegacyProductAttributes\Event\LegacyProductAttributesEvents;
+use LegacyProductAttributes\Event\UpdateStockEvent;
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombination;
 use LegacyProductAttributes\Model\LegacyCartItemAttributeCombinationQuery;
 use LegacyProductAttributes\Model\LegacyOrderProductAttributeCombination;
@@ -38,12 +40,12 @@ class OrderAction implements EventSubscriberInterface
      * @var RequestStack
      */
     protected $requestStack;
-    
+
     /**
      * @var int
      */
     protected $allowNegativeStock;
-    
+
     /**
      * OrderAction constructor.
      * @param RequestStack $requestStack
@@ -51,7 +53,7 @@ class OrderAction implements EventSubscriberInterface
     public function __construct(RequestStack $requestStack)
     {
         $this->requestStack = $requestStack;
-    
+
         $this->allowNegativeStock = intval(ConfigQuery::read('allow_negative_stock', 0));
     }
 
@@ -78,6 +80,9 @@ class OrderAction implements EventSubscriberInterface
 
         $locale = $this->requestStack->getCurrentRequest()->getSession()->getLang()->getLocale();
 
+//echo "$legacyCartItemAttributeCombinations=".$$legacyCartItemAttributeCombinations.count();
+// exit();
+
         /** @var LegacyCartItemAttributeCombination $legacyCartItemAttributeCombination */
         foreach ($legacyCartItemAttributeCombinations as $legacyCartItemAttributeCombination) {
             /** @var Attribute $attribute */
@@ -95,7 +100,7 @@ class OrderAction implements EventSubscriberInterface
             );
 
             $orderProductAttributeCombination = new OrderProductAttributeCombination();
-    
+
             $orderProductAttributeCombination
                 ->setOrderProductId($event->getId())
                 ->setAttributeTitle($attribute->getTitle())
@@ -107,10 +112,10 @@ class OrderAction implements EventSubscriberInterface
                 ->setAttributeAvDescription($attributeAv->getDescription())
                 ->setAttributeAvPostscriptum($attributeAv->getPostscriptum())
                 ->save();
-    
+
             // Save combination legacy information to be able to manage stock later.
             $cartItem = CartItemQuery::create()->findPk($event->getCartItemId());
-    
+
             (new LegacyOrderProductAttributeCombination())
                 ->setOrderProductId($event->getId())
                 ->setProductId($cartItem->getProductId())
@@ -119,7 +124,7 @@ class OrderAction implements EventSubscriberInterface
                 ->save();
         }
     }
-    
+
     /**
      * Get ordrered items out of stock if we have to do this at order creation.
      *
@@ -130,12 +135,12 @@ class OrderAction implements EventSubscriberInterface
     public function orderCreated(OrderEvent $event, $eventName, EventDispatcherInterface $dispatcher)
     {
         $order = $event->getOrder();
-        
+
         if ($this->decreaseStockAtOrderCreation($order, $dispatcher)) {
-            $this->manageLegacyStock($order, -1);
+            $this->manageLegacyStock($order, -1, $dispatcher);
         }
     }
-    
+
     /**
      * Manage legacy stock when order status changes
      *
@@ -147,21 +152,21 @@ class OrderAction implements EventSubscriberInterface
     {
         $order = $event->getOrder();
         $newStatus = $event->getStatus();
-            
+
         $decreaseStockAtOrderCreation = $this->decreaseStockAtOrderCreation($order, $dispatcher);
-    
+
         $canceledStatus = OrderStatusQuery::getCancelledStatus()->getId();
         $paidStatus = OrderStatusQuery::getPaidStatus()->getId();
-        
+
         if ($newStatus == $canceledStatus) {
             // Order is canceled, get items back in stock
-            $this->manageLegacyStock($order, +1);
+            $this->manageLegacyStock($order, +1, $dispatcher);
         } elseif (! $decreaseStockAtOrderCreation && $newStatus == $paidStatus && $order->isNotPaid() && $order->getVersion() == 1) {
             // Order is paid, get items out of stock
-            $this->manageLegacyStock($order, -1);
+            $this->manageLegacyStock($order, -1, $dispatcher);
         }
     }
-    
+
     /**
      * Check if we have to decrease stock at order creation or at order payment.
      *
@@ -172,32 +177,32 @@ class OrderAction implements EventSubscriberInterface
     protected function decreaseStockAtOrderCreation(Order $order, EventDispatcherInterface $dispatcher)
     {
         $paymentModule = ModuleQuery::create()->findPk($order->getPaymentModuleId());
-    
+
         /** @var PaymentModuleInterface $paymentModuleInstance */
         $paymentModuleInstance = $paymentModule->createInstance();
-    
+
         $event = new ManageStockOnCreationEvent($paymentModuleInstance);
-    
+
         $dispatcher->dispatch(
             TheliaEvents::getModuleEvent(
                 TheliaEvents::MODULE_PAYMENT_MANAGE_STOCK,
                 $paymentModuleInstance->getCode()
             )
         );
-    
+
         return
             (null !== $event->getManageStock())
                 ? $event->getManageStock()
                 : $paymentModuleInstance->manageStockOnCreation();
     }
-    
+
     /**
      * Increase or decrease legacy attributes stock for a given order.
      *
      * @param Order $order
      * @param int $delta +1 or -1
      */
-    protected function manageLegacyStock(Order $order, $delta)
+    protected function manageLegacyStock(Order $order, $delta, EventDispatcherInterface $dispatcher)
     {
         $legacyOrderProductAttributeCombinations = LegacyOrderProductAttributeCombinationQuery::create()
             ->useOrderProductQuery()
@@ -214,7 +219,7 @@ class OrderAction implements EventSubscriberInterface
                     $legacyOrderProductAttributeCombination->getAttributeAvId(),
                 ])) {
                 // If we're about to decrease stock, check that we have enough items
-                if ($delta > 0 && ConfigQuery::checkAvailableStock()) {
+                if ($delta < 0 && ConfigQuery::checkAvailableStock()) {
                     if ($legacyProductAttributeValue->getStock() < $legacyOrderProductAttributeCombination->getQuantity()) {
                         /** @var AttributeAv $attributeAv */
                         $attributeAv = I18n::forceI18nRetrieving(
@@ -222,24 +227,30 @@ class OrderAction implements EventSubscriberInterface
                             'AttributeAv',
                             $legacyOrderProductAttributeCombination->getAttributeAvId()
                         );
-    
+
                         throw new TheliaProcessException(
-                            $attributeAv->getTitle() . " : Not enough stock"
+                            $attributeAv->getTitle() . " : Not enough stock 3"
                         );
                     }
                 }
-                
+
                 $newStock = $legacyProductAttributeValue->getStock()
                     + ($delta * $legacyOrderProductAttributeCombination->getQuantity())
                 ;
-    
+
                 if ($newStock < 0 && ! $this->allowNegativeStock) {
                     $newStock = 0;
                 }
-    
+
                 $legacyProductAttributeValue
                     ->setStock($newStock)
                     ->save();
+
+                // Update product total stock
+                $dispatcher->dispatch(
+                    LegacyProductAttributesEvents::UPDATE_PRODUCT_STOCK,
+                    new UpdateStockEvent($legacyOrderProductAttributeCombination->getProductId())
+                );
             }
         }
     }

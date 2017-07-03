@@ -16,7 +16,7 @@ class LegacyProductAttributes extends BaseModule
     {
         $database = new Database($con);
 
-        $database->insertSql(null, [__DIR__ . "/Config/create.sql"]);
+        $database->insertSql(null, [__DIR__ . "/Config/thelia.sql"]);
 
         return true;
     }
@@ -30,5 +30,10 @@ class LegacyProductAttributes extends BaseModule
         $database = new Database($con);
 
         $database->insertSql(null, [__DIR__ . "/Config/delete.sql"]);
+    }
+
+    public function update($currentVersion, $newVersion, ConnectionInterface $con = null)
+    {
+        // Nothing to update yet :)
     }
 }

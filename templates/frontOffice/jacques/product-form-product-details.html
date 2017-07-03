@@ -1,26 +1,21 @@
 {$product_id = $product_id|default:{product attr='id'}}
-
 <script type="text/html" class="form-product-details-legacy-product-attributes" data-product="{$product_id}">
     {form name='thelia.cart.add'}
-    <fieldset class="product-options">
         {loop
             name='legacy_product_attributes.attributes'
             type='attribute'
             product=$product_id
         }
-            <div class="option option-option">
-                {form_field form=$form field="legacy_product_attribute_{$ID}"}
-                <label for="option-{$ID}" class="option-heading">{$TITLE}</label>
+            {form_field form=$form field="legacy_product_attribute_{$ID}"}
                 <div class="option-content">
-                    <select id="option-{$ID}" name="{$name}" {if $required}required {/if}{if $disabled}disabled {/if}class="form-control pse-option legacy-product-attribute">
+                    {$label = ($CHAPO)?$CHAPO:$TITLE}
+                    <select id="option-{$ID}" name="{$name}" data-container="body" data-title="{$label}" {if $required}required {/if}{if $disabled}disabled {/if}class="form-control pse-option legacy-product-attribute">
                         {foreach $choices as $choice}
                             <option value="{$choice->value}">{$choice->label}</option>
                         {/foreach}
                     </select>
                 </div>
-                {/form_field}
-            </div>
+            {/form_field}
         {/loop}
-    </fieldset>
     {/form}
 </script>
